@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QIcon
 
 app = QApplication(sys.argv)
@@ -98,29 +98,41 @@ level1_win.setCentralWidget(central3)
 v3 = QVBoxLayout(central3)
 v3.setContentsMargins(20, 20, 20, 20)
 
-# Верхняя панель
+# Верхняя панель (кнопка назад, заголовок, очки)
 top_panel = QHBoxLayout()
+
 back1 = QPushButton("НАЗАД")
 back1.setFixedSize(90, 30)
 back1.setFont(QFont("Arial", 10, QFont.Bold))
 back1.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
 top_panel.addWidget(back1)
+
 top_panel.addStretch()
+
+level_title = QLabel("УРОВЕНЬ 1")
+level_title.setFont(QFont("Arial", 24, QFont.Bold))
+level_title.setAlignment(Qt.AlignCenter)
+level_title.setStyleSheet("color: #ffb7b2;")
+top_panel.addWidget(level_title)
+
+top_panel.addStretch()
+
 score_label = QLabel("⭐ 0")
 score_label.setFont(QFont("Arial", 18, QFont.Bold))
 score_label.setStyleSheet("color: #ffb7b2;")
 top_panel.addWidget(score_label)
+
 v3.addLayout(top_panel)
 
-lbl = QLabel("УРОВЕНЬ 1")
-lbl.setFont(QFont("Arial", 24, QFont.Bold))
-lbl.setAlignment(Qt.AlignCenter)
-lbl.setStyleSheet("color: #ffb7b2;")
-v3.addWidget(lbl)
+# Место для сообщений
+message_label = QLabel("")
+message_label.setFont(QFont("Arial", 28, QFont.Bold))
+message_label.setAlignment(Qt.AlignCenter)
+v3.addWidget(message_label)
 
-target_words = ["ТОК", "КОТ", "КИТ", "БИТ", "БОК", "БИНТ", "КИНО", "ОКНО"]
-found_words = []  # отгаданные слова
-word_labels = []  # метки с точками-словами
+target_words = ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]
+found_words = []
+word_labels = []
 
 for w in target_words:
     dots = " ".join(["."] * len(w))
@@ -134,7 +146,6 @@ for w in target_words:
 
 v3.addStretch()
 
-# поле для ввода слов
 current_word = ""
 current_word_label = QLabel("")
 current_word_label.setFont(QFont("Courier", 32, QFont.Bold))
@@ -166,14 +177,12 @@ hint.setFont(QFont("Arial", 12))
 hint.setStyleSheet("color: #d4a5a5;")
 v3.addWidget(hint)
 
-# БУКВЫ
 h_letters = QHBoxLayout()
 h_letters.setAlignment(Qt.AlignCenter)
 h_letters.setSpacing(10)
 
 letter_buttons = []
 main_word = "БОТИНОК"
-
 for letter in main_word:
     b = QPushButton(letter)
     b.setFixedSize(60, 60)
@@ -181,11 +190,15 @@ for letter in main_word:
     b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
     h_letters.addWidget(b)
     letter_buttons.append(b)
-
 v3.addLayout(h_letters)
 
 score = 0
-used_indices = []  # какие кнопки букв уже использованы
+used_indices = []
+
+def show_message(text, color):
+    message_label.setText(text)
+    message_label.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
+    QTimer.singleShot(1500, lambda: message_label.setText(""))
 
 def update_score():
     score_label.setText(f"⭐ {score}")
@@ -231,16 +244,16 @@ def check_word():
     word = current_word.upper()
 
     if not word:
-        print("Собери слово!")
+        show_message("Собери слово!", "red")
         return
 
     if word not in target_words:
-        print(f"'{word}' нет в списке!")
+        show_message(f"'{word}' нет в списке!", "red")
         clear_word()
         return
 
     if word in found_words:
-        print(f"'{word}' уже найдено!")
+        show_message(f"'{word}' уже найдено!", "orange")
         clear_word()
         return
 
@@ -260,7 +273,7 @@ def check_word():
             break
 
     if not possible:
-        print(f"'{word}' нельзя составить из букв!")
+        show_message(f"'{word}' нельзя составить из букв!", "red")
         clear_word()
         return
 
@@ -272,35 +285,29 @@ def check_word():
     update_words_display()
     clear_word()
 
-    print(f"+{points} очков!")
+    show_message(f"+{points} очков!", "green")
 
     # все ли слова отгаданы?
     if len(found_words) >= len(target_words):
-        print("УРОВЕНЬ ПРОЙДЕН!")
+        show_message("УРОВЕНЬ ПРОЙДЕН!", "blue")
 
-
-# назначение действий
 for i, btn in enumerate(letter_buttons):
     btn.clicked.connect(lambda checked, idx=i: add_letter(idx))
 
 clear_btn.clicked.connect(clear_word)
 check_btn.clicked.connect(check_word)
 
-
 def to_levels():
     main_win.hide()
     levels_win.show()
-
 
 def back_to_main():
     levels_win.hide()
     main_win.show()
 
-
 def to_level1():
     levels_win.hide()
     level1_win.show()
-
 
 def back_from_level1():
     level1_win.hide()
