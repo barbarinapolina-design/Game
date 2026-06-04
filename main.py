@@ -98,22 +98,18 @@ level1_win.setCentralWidget(central3)
 v3 = QVBoxLayout(central3)
 v3.setContentsMargins(20, 20, 20, 20)
 
+# Верхняя панель
 top_panel = QHBoxLayout()
-
 back1 = QPushButton("НАЗАД")
 back1.setFixedSize(90, 30)
 back1.setFont(QFont("Arial", 10, QFont.Bold))
 back1.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
 top_panel.addWidget(back1)
-
 top_panel.addStretch()
-
-score = 0
 score_label = QLabel("⭐ 0")
 score_label.setFont(QFont("Arial", 18, QFont.Bold))
 score_label.setStyleSheet("color: #ffb7b2;")
 top_panel.addWidget(score_label)
-
 v3.addLayout(top_panel)
 
 lbl = QLabel("УРОВЕНЬ 1")
@@ -122,7 +118,11 @@ lbl.setAlignment(Qt.AlignCenter)
 lbl.setStyleSheet("color: #ffb7b2;")
 v3.addWidget(lbl)
 
-for w in ["ТОК", "КОТ", "КИТ", "БИТ", "БОК", "БИНТ", "КИНО", "ОКНО"]:
+target_words = ["ТОК", "КОТ", "КИТ", "БИТ", "БОК", "БИНТ", "КИНО", "ОКНО"]
+found_words = []  # отгаданные слова
+word_labels = []  # метки с точками-словами
+
+for w in target_words:
     dots = " ".join(["."] * len(w))
     lbl = QLabel(dots)
     lbl.setFont(QFont("Courier", 20, QFont.Bold))
@@ -130,9 +130,12 @@ for w in ["ТОК", "КОТ", "КИТ", "БИТ", "БОК", "БИНТ", "КИН�
     lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
     lbl.setFixedWidth(len(w) * 50)
     v3.addWidget(lbl, alignment=Qt.AlignCenter)
+    word_labels.append(lbl)
 
 v3.addStretch()
 
+# поле для ввода слов
+current_word = ""
 current_word_label = QLabel("")
 current_word_label.setFont(QFont("Courier", 32, QFont.Bold))
 current_word_label.setAlignment(Qt.AlignCenter)
@@ -148,16 +151,14 @@ clear_btn = QPushButton("✖")
 clear_btn.setFixedSize(70, 70)
 clear_btn.setFont(QFont("Arial", 28))
 clear_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
-clear_btn.clicked.connect(lambda: print("Очистить слово"))
+buttons_layout.addWidget(clear_btn)
 
 check_btn = QPushButton("✓")
 check_btn.setFixedSize(70, 70)
 check_btn.setFont(QFont("Arial", 28))
 check_btn.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
-check_btn.clicked.connect(lambda: print("Проверить слово"))
-
-buttons_layout.addWidget(clear_btn)
 buttons_layout.addWidget(check_btn)
+
 v3.addLayout(buttons_layout)
 
 hint = QLabel("Составь слово из букв:")
@@ -165,29 +166,141 @@ hint.setFont(QFont("Arial", 12))
 hint.setStyleSheet("color: #d4a5a5;")
 v3.addWidget(hint)
 
-# Буквы
+# БУКВЫ
 h_letters = QHBoxLayout()
 h_letters.setAlignment(Qt.AlignCenter)
 h_letters.setSpacing(10)
-for letter in "БОТИНОК":
+
+letter_buttons = []
+main_word = "БОТИНОК"
+
+for letter in main_word:
     b = QPushButton(letter)
     b.setFixedSize(60, 60)
     b.setFont(QFont("Arial", 18, QFont.Bold))
     b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
     h_letters.addWidget(b)
+    letter_buttons.append(b)
+
 v3.addLayout(h_letters)
+
+score = 0
+used_indices = []  # какие кнопки букв уже использованы
+
+def update_score():
+    score_label.setText(f"⭐ {score}")
+
+def update_words_display():
+    for i, w in enumerate(target_words):
+        if w in found_words:
+            word_labels[i].setText(" ".join(w))
+            word_labels[i].setStyleSheet(
+                "background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
+        else:
+            dots = " ".join(["."] * len(w))
+            word_labels[i].setText(dots)
+            word_labels[i].setStyleSheet(
+                "background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+
+def update_letters_state():
+    for i, btn in enumerate(letter_buttons):
+        if i in used_indices:
+            btn.setEnabled(False)
+            btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
+        else:
+            btn.setEnabled(True)
+            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+
+def add_letter(index):
+    global current_word
+    if index not in used_indices:
+        current_word += main_word[index].lower()
+        used_indices.append(index)
+        current_word_label.setText(" ".join(current_word.upper()))
+        update_letters_state()
+
+def clear_word():
+    global current_word, used_indices
+    current_word = ""
+    used_indices = []
+    current_word_label.setText("")
+    update_letters_state()
+
+def check_word():
+    global score, current_word
+    word = current_word.upper()
+
+    if not word:
+        print("Собери слово!")
+        return
+
+    if word not in target_words:
+        print(f"'{word}' нет в списке!")
+        clear_word()
+        return
+
+    if word in found_words:
+        print(f"'{word}' уже найдено!")
+        clear_word()
+        return
+
+    # можно ли составить слово из букв?
+    main_counter = {}
+    for ch in main_word:
+        main_counter[ch] = main_counter.get(ch, 0) + 1
+
+    word_counter = {}
+    for ch in word:
+        word_counter[ch] = word_counter.get(ch, 0) + 1
+
+    possible = True
+    for ch in word_counter:
+        if word_counter[ch] > main_counter.get(ch, 0):
+            possible = False
+            break
+
+    if not possible:
+        print(f"'{word}' нельзя составить из букв!")
+        clear_word()
+        return
+
+    # Успех
+    points = len(word)
+    score += points
+    found_words.append(word)
+    update_score()
+    update_words_display()
+    clear_word()
+
+    print(f"+{points} очков!")
+
+    # все ли слова отгаданы?
+    if len(found_words) >= len(target_words):
+        print("УРОВЕНЬ ПРОЙДЕН!")
+
+
+# назначение действий
+for i, btn in enumerate(letter_buttons):
+    btn.clicked.connect(lambda checked, idx=i: add_letter(idx))
+
+clear_btn.clicked.connect(clear_word)
+check_btn.clicked.connect(check_word)
+
 
 def to_levels():
     main_win.hide()
     levels_win.show()
 
+
 def back_to_main():
     levels_win.hide()
     main_win.show()
 
+
 def to_level1():
     levels_win.hide()
     level1_win.show()
+
 
 def back_from_level1():
     level1_win.hide()
