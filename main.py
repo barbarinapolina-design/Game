@@ -89,7 +89,7 @@ v2.addStretch()
 # ОКНО 1 УРОВНЯ
 level1_win = QMainWindow()
 level1_win.setWindowTitle("Слова из слова - Уровень 1")
-level1_win.setFixedSize(700, 800)
+level1_win.setFixedSize(700, 850)
 level1_win.setStyleSheet("background-color: #fff5e6;")
 level1_win.setWindowIcon(QIcon("images/word.png"))
 
@@ -98,14 +98,23 @@ level1_win.setCentralWidget(central3)
 v3 = QVBoxLayout(central3)
 v3.setContentsMargins(20, 20, 20, 20)
 
-top1 = QHBoxLayout()
+top_panel = QHBoxLayout()
+
 back1 = QPushButton("НАЗАД")
 back1.setFixedSize(90, 30)
 back1.setFont(QFont("Arial", 10, QFont.Bold))
 back1.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
-top1.addWidget(back1)
-top1.addStretch()
-v3.addLayout(top1)
+top_panel.addWidget(back1)
+
+top_panel.addStretch()
+
+score = 0
+score_label = QLabel("⭐ 0")
+score_label.setFont(QFont("Arial", 18, QFont.Bold))
+score_label.setStyleSheet("color: #ffb7b2;")
+top_panel.addWidget(score_label)
+
+v3.addLayout(top_panel)
 
 lbl = QLabel("УРОВЕНЬ 1")
 lbl.setFont(QFont("Arial", 24, QFont.Bold))
@@ -123,6 +132,33 @@ for w in ["ТОК", "КОТ", "КИТ", "БИТ", "БОК", "БИНТ", "КИН�
     v3.addWidget(lbl, alignment=Qt.AlignCenter)
 
 v3.addStretch()
+
+current_word_label = QLabel("")
+current_word_label.setFont(QFont("Courier", 32, QFont.Bold))
+current_word_label.setAlignment(Qt.AlignCenter)
+current_word_label.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
+current_word_label.setMinimumHeight(80)
+v3.addWidget(current_word_label)
+
+buttons_layout = QHBoxLayout()
+buttons_layout.setAlignment(Qt.AlignCenter)
+buttons_layout.setSpacing(30)
+
+clear_btn = QPushButton("✖")
+clear_btn.setFixedSize(70, 70)
+clear_btn.setFont(QFont("Arial", 28))
+clear_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+clear_btn.clicked.connect(lambda: print("Очистить слово"))
+
+check_btn = QPushButton("✓")
+check_btn.setFixedSize(70, 70)
+check_btn.setFont(QFont("Arial", 28))
+check_btn.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+check_btn.clicked.connect(lambda: print("Проверить слово"))
+
+buttons_layout.addWidget(clear_btn)
+buttons_layout.addWidget(check_btn)
+v3.addLayout(buttons_layout)
 
 hint = QLabel("Составь слово из букв:")
 hint.setFont(QFont("Arial", 12))
