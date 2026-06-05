@@ -494,7 +494,6 @@ level3_win.setCentralWidget(central5)
 v5 = QVBoxLayout(central5)
 v5.setContentsMargins(20, 20, 20, 20)
 
-# Верхняя панель
 top_panel3 = QHBoxLayout()
 back3 = QPushButton("НАЗАД")
 back3.setFixedSize(90, 30)
@@ -535,7 +534,6 @@ for w in target_words3:
 
 v5.addStretch()
 
-# Поле для ввода слова
 current_word3 = ""
 current_word_label3 = QLabel("")
 current_word_label3.setFont(QFont("Courier", 32, QFont.Bold))
@@ -544,7 +542,6 @@ current_word_label3.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; pa
 current_word_label3.setMinimumHeight(80)
 v5.addWidget(current_word_label3)
 
-# Кнопки действий
 buttons_layout3 = QHBoxLayout()
 buttons_layout3.setAlignment(Qt.AlignCenter)
 buttons_layout3.setSpacing(30)
@@ -583,17 +580,105 @@ for letter in main_word3:
     letter_buttons3.append(b)
 v5.addLayout(h_letters3)
 
-# Пока кнопки 3 уровня не активны
+score3 = 0
+used_indices3 = []
+
 def show_message3(text, color):
     message_label3.setText(text)
     message_label3.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
     QTimer.singleShot(1500, lambda: message_label3.setText(""))
 
-for i, btn in enumerate(letter_buttons3):
-    btn.clicked.connect(lambda checked, idx=i: show_message3("Скоро будет готово!", "orange"))
+def update_score3():
+    score_label3.setText(f"⭐ {score3}")
 
-clear_btn3.clicked.connect(lambda: show_message3("Скоро будет готово!", "orange"))
-check_btn3.clicked.connect(lambda: show_message3("Скоро будет готово!", "orange"))
+def update_words_display3():
+    for i, w in enumerate(target_words3):
+        if w in found_words3:
+            word_labels3[i].setText(" ".join(w))
+            word_labels3[i].setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
+        else:
+            dots = " ".join(["."] * len(w))
+            word_labels3[i].setText(dots)
+            word_labels3[i].setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+
+def update_letters_state3():
+    for i, btn in enumerate(letter_buttons3):
+        if i in used_indices3:
+            btn.setEnabled(False)
+            btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
+        else:
+            btn.setEnabled(True)
+            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+
+def add_letter3(index):
+    global current_word3
+    if index not in used_indices3:
+        current_word3 += main_word3[index].lower()
+        used_indices3.append(index)
+        current_word_label3.setText(" ".join(current_word3.upper()))
+        update_letters_state3()
+
+def clear_word3():
+    global current_word3, used_indices3
+    current_word3 = ""
+    used_indices3 = []
+    current_word_label3.setText("")
+    update_letters_state3()
+
+def check_word3():
+    global score3, current_word3
+    word = current_word3.upper()
+
+    if not word:
+        show_message3("Собери слово!", "red")
+        return
+
+    if word not in target_words3:
+        show_message3(f"'{word}' нет в списке!", "red")
+        clear_word3()
+        return
+
+    if word in found_words3:
+        show_message3(f"'{word}' уже найдено!", "orange")
+        clear_word3()
+        return
+
+    main_counter = {}
+    for ch in main_word3:
+        main_counter[ch] = main_counter.get(ch, 0) + 1
+
+    word_counter = {}
+    for ch in word:
+        word_counter[ch] = word_counter.get(ch, 0) + 1
+
+    possible = True
+    for ch in word_counter:
+        if word_counter[ch] > main_counter.get(ch, 0):
+            possible = False
+            break
+
+    if not possible:
+        show_message3(f"'{word}' нельзя составить из букв!", "red")
+        clear_word3()
+        return
+
+    points = len(word)
+    score3 += points
+    found_words3.append(word)
+    update_score3()
+    update_words_display3()
+    clear_word3()
+
+    show_message3(f"+{points} очков!", "green")
+
+    if len(found_words3) >= len(target_words3):
+        show_message3("УРОВЕНЬ ПРОЙДЕН!", "blue")
+
+for i, btn in enumerate(letter_buttons3):
+    btn.clicked.connect(lambda checked, idx=i: add_letter3(idx))
+
+clear_btn3.clicked.connect(clear_word3)
+check_btn3.clicked.connect(check_word3)
 
 # Переходы
 def to_levels():
