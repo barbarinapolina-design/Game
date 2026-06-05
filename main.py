@@ -98,43 +98,36 @@ level1_win.setCentralWidget(central3)
 v3 = QVBoxLayout(central3)
 v3.setContentsMargins(20, 20, 20, 20)
 
-# Верхняя панель (кнопка назад, заголовок, очки)
-top_panel = QHBoxLayout()
-
+# Верхняя панель
+top_panel1 = QHBoxLayout()
 back1 = QPushButton("НАЗАД")
 back1.setFixedSize(90, 30)
 back1.setFont(QFont("Arial", 10, QFont.Bold))
 back1.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
-top_panel.addWidget(back1)
+top_panel1.addWidget(back1)
+top_panel1.addStretch()
+level_title1 = QLabel("УРОВЕНЬ 1")
+level_title1.setFont(QFont("Arial", 24, QFont.Bold))
+level_title1.setAlignment(Qt.AlignCenter)
+level_title1.setStyleSheet("color: #ffb7b2;")
+top_panel1.addWidget(level_title1)
+top_panel1.addStretch()
+score_label1 = QLabel("⭐ 0")
+score_label1.setFont(QFont("Arial", 18, QFont.Bold))
+score_label1.setStyleSheet("color: #ffb7b2;")
+top_panel1.addWidget(score_label1)
+v3.addLayout(top_panel1)
 
-top_panel.addStretch()
+message_label1 = QLabel("")
+message_label1.setFont(QFont("Arial", 28, QFont.Bold))
+message_label1.setAlignment(Qt.AlignCenter)
+v3.addWidget(message_label1)
 
-level_title = QLabel("УРОВЕНЬ 1")
-level_title.setFont(QFont("Arial", 24, QFont.Bold))
-level_title.setAlignment(Qt.AlignCenter)
-level_title.setStyleSheet("color: #ffb7b2;")
-top_panel.addWidget(level_title)
+target_words1 = ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]
+found_words1 = []
+word_labels1 = []
 
-top_panel.addStretch()
-
-score_label = QLabel("⭐ 0")
-score_label.setFont(QFont("Arial", 18, QFont.Bold))
-score_label.setStyleSheet("color: #ffb7b2;")
-top_panel.addWidget(score_label)
-
-v3.addLayout(top_panel)
-
-# Место для сообщений
-message_label = QLabel("")
-message_label.setFont(QFont("Arial", 28, QFont.Bold))
-message_label.setAlignment(Qt.AlignCenter)
-v3.addWidget(message_label)
-
-target_words = ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]
-found_words = []
-word_labels = []
-
-for w in target_words:
+for w in target_words1:
     dots = " ".join(["."] * len(w))
     lbl = QLabel(dots)
     lbl.setFont(QFont("Courier", 20, QFont.Bold))
@@ -142,124 +135,121 @@ for w in target_words:
     lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
     lbl.setFixedWidth(len(w) * 50)
     v3.addWidget(lbl, alignment=Qt.AlignCenter)
-    word_labels.append(lbl)
+    word_labels1.append(lbl)
 
 v3.addStretch()
 
-current_word = ""
-current_word_label = QLabel("")
-current_word_label.setFont(QFont("Courier", 32, QFont.Bold))
-current_word_label.setAlignment(Qt.AlignCenter)
-current_word_label.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
-current_word_label.setMinimumHeight(80)
-v3.addWidget(current_word_label)
+current_word1 = ""
+current_word_label1 = QLabel("")
+current_word_label1.setFont(QFont("Courier", 32, QFont.Bold))
+current_word_label1.setAlignment(Qt.AlignCenter)
+current_word_label1.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
+current_word_label1.setMinimumHeight(80)
+v3.addWidget(current_word_label1)
 
-buttons_layout = QHBoxLayout()
-buttons_layout.setAlignment(Qt.AlignCenter)
-buttons_layout.setSpacing(30)
+buttons_layout1 = QHBoxLayout()
+buttons_layout1.setAlignment(Qt.AlignCenter)
+buttons_layout1.setSpacing(30)
 
-clear_btn = QPushButton("✖")
-clear_btn.setFixedSize(70, 70)
-clear_btn.setFont(QFont("Arial", 28))
-clear_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
-buttons_layout.addWidget(clear_btn)
+clear_btn1 = QPushButton("✖")
+clear_btn1.setFixedSize(70, 70)
+clear_btn1.setFont(QFont("Arial", 28))
+clear_btn1.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+buttons_layout1.addWidget(clear_btn1)
 
-check_btn = QPushButton("✓")
-check_btn.setFixedSize(70, 70)
-check_btn.setFont(QFont("Arial", 28))
-check_btn.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
-buttons_layout.addWidget(check_btn)
+check_btn1 = QPushButton("✓")
+check_btn1.setFixedSize(70, 70)
+check_btn1.setFont(QFont("Arial", 28))
+check_btn1.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+buttons_layout1.addWidget(check_btn1)
 
-v3.addLayout(buttons_layout)
+v3.addLayout(buttons_layout1)
 
-hint = QLabel("Составь слово из букв:")
-hint.setFont(QFont("Arial", 12))
-hint.setStyleSheet("color: #d4a5a5;")
-v3.addWidget(hint)
+hint1 = QLabel("Составь слово из букв:")
+hint1.setFont(QFont("Arial", 12))
+hint1.setStyleSheet("color: #d4a5a5;")
+v3.addWidget(hint1)
 
-h_letters = QHBoxLayout()
-h_letters.setAlignment(Qt.AlignCenter)
-h_letters.setSpacing(10)
+h_letters1 = QHBoxLayout()
+h_letters1.setAlignment(Qt.AlignCenter)
+h_letters1.setSpacing(10)
 
-letter_buttons = []
-main_word = "БОТИНОК"
-for letter in main_word:
+letter_buttons1 = []
+main_word1 = "БОТИНОК"
+for letter in main_word1:
     b = QPushButton(letter)
     b.setFixedSize(60, 60)
     b.setFont(QFont("Arial", 18, QFont.Bold))
     b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
-    h_letters.addWidget(b)
-    letter_buttons.append(b)
-v3.addLayout(h_letters)
+    h_letters1.addWidget(b)
+    letter_buttons1.append(b)
+v3.addLayout(h_letters1)
 
-score = 0
-used_indices = []
+score1 = 0
+used_indices1 = []
 
-def show_message(text, color):
-    message_label.setText(text)
-    message_label.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
-    QTimer.singleShot(1500, lambda: message_label.setText(""))
+def show_message1(text, color):
+    message_label1.setText(text)
+    message_label1.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
+    QTimer.singleShot(1500, lambda: message_label1.setText(""))
 
-def update_score():
-    score_label.setText(f"⭐ {score}")
+def update_score1():
+    score_label1.setText(f"⭐ {score1}")
 
-def update_words_display():
-    for i, w in enumerate(target_words):
-        if w in found_words:
-            word_labels[i].setText(" ".join(w))
-            word_labels[i].setStyleSheet(
-                "background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
+def update_words_display1():
+    for i, w in enumerate(target_words1):
+        if w in found_words1:
+            word_labels1[i].setText(" ".join(w))
+            word_labels1[i].setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
         else:
             dots = " ".join(["."] * len(w))
-            word_labels[i].setText(dots)
-            word_labels[i].setStyleSheet(
-                "background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+            word_labels1[i].setText(dots)
+            word_labels1[i].setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
 
-def update_letters_state():
-    for i, btn in enumerate(letter_buttons):
-        if i in used_indices:
+def update_letters_state1():
+    for i, btn in enumerate(letter_buttons1):
+        if i in used_indices1:
             btn.setEnabled(False)
             btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
         else:
             btn.setEnabled(True)
             btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
 
-def add_letter(index):
-    global current_word
-    if index not in used_indices:
-        current_word += main_word[index].lower()
-        used_indices.append(index)
-        current_word_label.setText(" ".join(current_word.upper()))
-        update_letters_state()
+def add_letter1(index):
+    global current_word1
+    if index not in used_indices1:
+        current_word1 += main_word1[index].lower()
+        used_indices1.append(index)
+        current_word_label1.setText(" ".join(current_word1.upper()))
+        update_letters_state1()
 
-def clear_word():
-    global current_word, used_indices
-    current_word = ""
-    used_indices = []
-    current_word_label.setText("")
-    update_letters_state()
+def clear_word1():
+    global current_word1, used_indices1
+    current_word1 = ""
+    used_indices1 = []
+    current_word_label1.setText("")
+    update_letters_state1()
 
-def check_word():
-    global score, current_word
-    word = current_word.upper()
+def check_word1():
+    global score1, current_word1
+    word = current_word1.upper()
 
     if not word:
-        show_message("Собери слово!", "red")
+        show_message1("Собери слово!", "red")
         return
 
-    if word not in target_words:
-        show_message(f"'{word}' нет в списке!", "red")
-        clear_word()
+    if word not in target_words1:
+        show_message1(f"'{word}' нет в списке!", "red")
+        clear_word1()
         return
 
-    if word in found_words:
-        show_message(f"'{word}' уже найдено!", "orange")
-        clear_word()
+    if word in found_words1:
+        show_message1(f"'{word}' уже найдено!", "orange")
+        clear_word1()
         return
 
-    # можно ли составить слово из букв?
     main_counter = {}
-    for ch in main_word:
+    for ch in main_word1:
         main_counter[ch] = main_counter.get(ch, 0) + 1
 
     word_counter = {}
@@ -273,30 +263,143 @@ def check_word():
             break
 
     if not possible:
-        show_message(f"'{word}' нельзя составить из букв!", "red")
-        clear_word()
+        show_message1(f"'{word}' нельзя составить из букв!", "red")
+        clear_word1()
         return
 
-    # Успех
     points = len(word)
-    score += points
-    found_words.append(word)
-    update_score()
-    update_words_display()
-    clear_word()
+    score1 += points
+    found_words1.append(word)
+    update_score1()
+    update_words_display1()
+    clear_word1()
 
-    show_message(f"+{points} очков!", "green")
+    show_message1(f"+{points} очков!", "green")
 
-    # все ли слова отгаданы?
-    if len(found_words) >= len(target_words):
-        show_message("УРОВЕНЬ ПРОЙДЕН!", "blue")
+    if len(found_words1) >= len(target_words1):
+        show_message1("УРОВЕНЬ ПРОЙДЕН!", "blue")
 
-for i, btn in enumerate(letter_buttons):
-    btn.clicked.connect(lambda checked, idx=i: add_letter(idx))
+for i, btn in enumerate(letter_buttons1):
+    btn.clicked.connect(lambda checked, idx=i: add_letter1(idx))
 
-clear_btn.clicked.connect(clear_word)
-check_btn.clicked.connect(check_word)
+clear_btn1.clicked.connect(clear_word1)
+check_btn1.clicked.connect(check_word1)
 
+# ОКНО 2 УРОВНЯ
+level2_win = QMainWindow()
+level2_win.setWindowTitle("Слова из слова - Уровень 2")
+level2_win.setFixedSize(700, 900)
+level2_win.setStyleSheet("background-color: #fff5e6;")
+level2_win.setWindowIcon(QIcon("images/word.png"))
+
+central4 = QWidget()
+level2_win.setCentralWidget(central4)
+v4 = QVBoxLayout(central4)
+v4.setContentsMargins(20, 20, 20, 20)
+
+# Верхняя панель
+top_panel2 = QHBoxLayout()
+back2 = QPushButton("НАЗАД")
+back2.setFixedSize(90, 30)
+back2.setFont(QFont("Arial", 10, QFont.Bold))
+back2.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
+top_panel2.addWidget(back2)
+top_panel2.addStretch()
+level_title2 = QLabel("УРОВЕНЬ 2")
+level_title2.setFont(QFont("Arial", 24, QFont.Bold))
+level_title2.setAlignment(Qt.AlignCenter)
+level_title2.setStyleSheet("color: #ffb7b2;")
+top_panel2.addWidget(level_title2)
+top_panel2.addStretch()
+score_label2 = QLabel("⭐ 0")
+score_label2.setFont(QFont("Arial", 18, QFont.Bold))
+score_label2.setStyleSheet("color: #ffb7b2;")
+top_panel2.addWidget(score_label2)
+v4.addLayout(top_panel2)
+
+message_label2 = QLabel("")
+message_label2.setFont(QFont("Arial", 28, QFont.Bold))
+message_label2.setAlignment(Qt.AlignCenter)
+v4.addWidget(message_label2)
+
+# Загаданные слова для 2 уровня
+target_words2 = ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ГРОМ", "ПОРА", "ГРАММ", "МРАМОР"]
+found_words2 = []
+word_labels2 = []
+
+for w in target_words2:
+    dots = " ".join(["."] * len(w))
+    lbl = QLabel(dots)
+    lbl.setFont(QFont("Courier", 20, QFont.Bold))
+    lbl.setAlignment(Qt.AlignCenter)
+    lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+    lbl.setFixedWidth(len(w) * 50)
+    v4.addWidget(lbl, alignment=Qt.AlignCenter)
+    word_labels2.append(lbl)
+
+v4.addStretch()
+
+# Поле для ввода слова
+current_word2 = ""
+current_word_label2 = QLabel("")
+current_word_label2.setFont(QFont("Courier", 32, QFont.Bold))
+current_word_label2.setAlignment(Qt.AlignCenter)
+current_word_label2.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
+current_word_label2.setMinimumHeight(80)
+v4.addWidget(current_word_label2)
+
+# Кнопки действий
+buttons_layout2 = QHBoxLayout()
+buttons_layout2.setAlignment(Qt.AlignCenter)
+buttons_layout2.setSpacing(30)
+
+clear_btn2 = QPushButton("✖")
+clear_btn2.setFixedSize(70, 70)
+clear_btn2.setFont(QFont("Arial", 28))
+clear_btn2.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+buttons_layout2.addWidget(clear_btn2)
+
+check_btn2 = QPushButton("✓")
+check_btn2.setFixedSize(70, 70)
+check_btn2.setFont(QFont("Arial", 28))
+check_btn2.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+buttons_layout2.addWidget(check_btn2)
+
+v4.addLayout(buttons_layout2)
+
+hint2 = QLabel("Составь слово из букв:")
+hint2.setFont(QFont("Arial", 12))
+hint2.setStyleSheet("color: #d4a5a5;")
+v4.addWidget(hint2)
+
+h_letters2 = QHBoxLayout()
+h_letters2.setAlignment(Qt.AlignCenter)
+h_letters2.setSpacing(10)
+
+letter_buttons2 = []
+main_word2 = "ПРОГРАММА"
+for letter in main_word2:
+    b = QPushButton(letter)
+    b.setFixedSize(60, 60)
+    b.setFont(QFont("Arial", 18, QFont.Bold))
+    b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+    h_letters2.addWidget(b)
+    letter_buttons2.append(b)
+v4.addLayout(h_letters2)
+
+# Пока кнопки 2 уровня не активны (просто выводят сообщение)
+def show_message2(text, color):
+    message_label2.setText(text)
+    message_label2.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
+    QTimer.singleShot(1500, lambda: message_label2.setText(""))
+
+for i, btn in enumerate(letter_buttons2):
+    btn.clicked.connect(lambda checked, idx=i: show_message2("Скоро будет готово!", "orange"))
+
+clear_btn2.clicked.connect(lambda: show_message2("Скоро будет готово!", "orange"))
+check_btn2.clicked.connect(lambda: show_message2("Скоро будет готово!", "orange"))
+
+# Переходы
 def to_levels():
     main_win.hide()
     levels_win.show()
@@ -309,15 +412,25 @@ def to_level1():
     levels_win.hide()
     level1_win.show()
 
+def to_level2():
+    levels_win.hide()
+    level2_win.show()
+
 def back_from_level1():
     level1_win.hide()
+    levels_win.show()
+
+def back_from_level2():
+    level2_win.hide()
     levels_win.show()
 
 play_btn.clicked.connect(to_levels)
 exit_btn.clicked.connect(main_win.close)
 back_btn.clicked.connect(back_to_main)
 btn1.clicked.connect(to_level1)
+btn2.clicked.connect(to_level2)
 back1.clicked.connect(back_from_level1)
+back2.clicked.connect(back_from_level2)
 
 main_win.show()
 sys.exit(app.exec_())
