@@ -98,7 +98,6 @@ level1_win.setCentralWidget(central3)
 v3 = QVBoxLayout(central3)
 v3.setContentsMargins(20, 20, 20, 20)
 
-# Верхняя панель
 top_panel1 = QHBoxLayout()
 back1 = QPushButton("НАЗАД")
 back1.setFixedSize(90, 30)
@@ -322,8 +321,7 @@ message_label2.setFont(QFont("Arial", 28, QFont.Bold))
 message_label2.setAlignment(Qt.AlignCenter)
 v4.addWidget(message_label2)
 
-# Загаданные слова для 2 уровня
-target_words2 = ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ГРОМ", "ПОРА", "ГРАММ", "МРАМОР"]
+target_words2 = ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ","ГАММА", "МРАМОР"]
 found_words2 = []
 word_labels2 = []
 
@@ -339,7 +337,6 @@ for w in target_words2:
 
 v4.addStretch()
 
-# Поле для ввода слова
 current_word2 = ""
 current_word_label2 = QLabel("")
 current_word_label2.setFont(QFont("Courier", 32, QFont.Bold))
@@ -348,7 +345,6 @@ current_word_label2.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; pa
 current_word_label2.setMinimumHeight(80)
 v4.addWidget(current_word_label2)
 
-# Кнопки действий
 buttons_layout2 = QHBoxLayout()
 buttons_layout2.setAlignment(Qt.AlignCenter)
 buttons_layout2.setSpacing(30)
@@ -387,17 +383,105 @@ for letter in main_word2:
     letter_buttons2.append(b)
 v4.addLayout(h_letters2)
 
-# Пока кнопки 2 уровня не активны (просто выводят сообщение)
+score2 = 0
+used_indices2 = []
+
 def show_message2(text, color):
     message_label2.setText(text)
     message_label2.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
     QTimer.singleShot(1500, lambda: message_label2.setText(""))
 
-for i, btn in enumerate(letter_buttons2):
-    btn.clicked.connect(lambda checked, idx=i: show_message2("Скоро будет готово!", "orange"))
+def update_score2():
+    score_label2.setText(f"⭐ {score2}")
 
-clear_btn2.clicked.connect(lambda: show_message2("Скоро будет готово!", "orange"))
-check_btn2.clicked.connect(lambda: show_message2("Скоро будет готово!", "orange"))
+def update_words_display2():
+    for i, w in enumerate(target_words2):
+        if w in found_words2:
+            word_labels2[i].setText(" ".join(w))
+            word_labels2[i].setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
+        else:
+            dots = " ".join(["."] * len(w))
+            word_labels2[i].setText(dots)
+            word_labels2[i].setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+
+def update_letters_state2():
+    for i, btn in enumerate(letter_buttons2):
+        if i in used_indices2:
+            btn.setEnabled(False)
+            btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
+        else:
+            btn.setEnabled(True)
+            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+
+def add_letter2(index):
+    global current_word2
+    if index not in used_indices2:
+        current_word2 += main_word2[index].lower()
+        used_indices2.append(index)
+        current_word_label2.setText(" ".join(current_word2.upper()))
+        update_letters_state2()
+
+def clear_word2():
+    global current_word2, used_indices2
+    current_word2 = ""
+    used_indices2 = []
+    current_word_label2.setText("")
+    update_letters_state2()
+
+def check_word2():
+    global score2, current_word2
+    word = current_word2.upper()
+
+    if not word:
+        show_message2("Собери слово!", "red")
+        return
+
+    if word not in target_words2:
+        show_message2(f"'{word}' нет в списке!", "red")
+        clear_word2()
+        return
+
+    if word in found_words2:
+        show_message2(f"'{word}' уже найдено!", "orange")
+        clear_word2()
+        return
+
+    main_counter = {}
+    for ch in main_word2:
+        main_counter[ch] = main_counter.get(ch, 0) + 1
+
+    word_counter = {}
+    for ch in word:
+        word_counter[ch] = word_counter.get(ch, 0) + 1
+
+    possible = True
+    for ch in word_counter:
+        if word_counter[ch] > main_counter.get(ch, 0):
+            possible = False
+            break
+
+    if not possible:
+        show_message2(f"'{word}' нельзя составить из букв!", "red")
+        clear_word2()
+        return
+
+    points = len(word)
+    score2 += points
+    found_words2.append(word)
+    update_score2()
+    update_words_display2()
+    clear_word2()
+
+    show_message2(f"+{points} очков!", "green")
+
+    if len(found_words2) >= len(target_words2):
+        show_message2("УРОВЕНЬ ПРОЙДЕН!", "blue")
+
+for i, btn in enumerate(letter_buttons2):
+    btn.clicked.connect(lambda checked, idx=i: add_letter2(idx))
+
+clear_btn2.clicked.connect(clear_word2)
+check_btn2.clicked.connect(check_word2)
 
 # Переходы
 def to_levels():
