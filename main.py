@@ -296,7 +296,6 @@ level2_win.setCentralWidget(central4)
 v4 = QVBoxLayout(central4)
 v4.setContentsMargins(20, 20, 20, 20)
 
-# Верхняя панель
 top_panel2 = QHBoxLayout()
 back2 = QPushButton("НАЗАД")
 back2.setFixedSize(90, 30)
@@ -321,7 +320,7 @@ message_label2.setFont(QFont("Arial", 28, QFont.Bold))
 message_label2.setAlignment(Qt.AlignCenter)
 v4.addWidget(message_label2)
 
-target_words2 = ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ","ГАММА", "МРАМОР"]
+target_words2 = ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ", "ГАММА", "МРАМОР"]
 found_words2 = []
 word_labels2 = []
 
@@ -483,6 +482,119 @@ for i, btn in enumerate(letter_buttons2):
 clear_btn2.clicked.connect(clear_word2)
 check_btn2.clicked.connect(check_word2)
 
+# ОКНО 3 УРОВНЯ
+level3_win = QMainWindow()
+level3_win.setWindowTitle("Слова из слова - Уровень 3")
+level3_win.setFixedSize(800, 1100)
+level3_win.setStyleSheet("background-color: #fff5e6;")
+level3_win.setWindowIcon(QIcon("images/word.png"))
+
+central5 = QWidget()
+level3_win.setCentralWidget(central5)
+v5 = QVBoxLayout(central5)
+v5.setContentsMargins(20, 20, 20, 20)
+
+# Верхняя панель
+top_panel3 = QHBoxLayout()
+back3 = QPushButton("НАЗАД")
+back3.setFixedSize(90, 30)
+back3.setFont(QFont("Arial", 10, QFont.Bold))
+back3.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 15px;")
+top_panel3.addWidget(back3)
+top_panel3.addStretch()
+level_title3 = QLabel("УРОВЕНЬ 3")
+level_title3.setFont(QFont("Arial", 24, QFont.Bold))
+level_title3.setAlignment(Qt.AlignCenter)
+level_title3.setStyleSheet("color: #ffb7b2;")
+top_panel3.addWidget(level_title3)
+top_panel3.addStretch()
+score_label3 = QLabel("⭐ 0")
+score_label3.setFont(QFont("Arial", 18, QFont.Bold))
+score_label3.setStyleSheet("color: #ffb7b2;")
+top_panel3.addWidget(score_label3)
+v5.addLayout(top_panel3)
+
+message_label3 = QLabel("")
+message_label3.setFont(QFont("Arial", 28, QFont.Bold))
+message_label3.setAlignment(Qt.AlignCenter)
+v5.addWidget(message_label3)
+
+target_words3 = ["ГИТ", "РИС", "АИСТ", "ГИРЯ", "ИГРА", "СТАЯ", "ТИГР", "РАЦИЯ", "АРЕСТ", "ГРАЦИЯ", "СТАРЕЦ", "РЕГИСТР"]
+found_words3 = []
+word_labels3 = []
+
+for w in target_words3:
+    dots = " ".join(["."] * len(w))
+    lbl = QLabel(dots)
+    lbl.setFont(QFont("Courier", 20, QFont.Bold))
+    lbl.setAlignment(Qt.AlignCenter)
+    lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+    lbl.setFixedWidth(len(w) * 50)
+    v5.addWidget(lbl, alignment=Qt.AlignCenter)
+    word_labels3.append(lbl)
+
+v5.addStretch()
+
+# Поле для ввода слова
+current_word3 = ""
+current_word_label3 = QLabel("")
+current_word_label3.setFont(QFont("Courier", 32, QFont.Bold))
+current_word_label3.setAlignment(Qt.AlignCenter)
+current_word_label3.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
+current_word_label3.setMinimumHeight(80)
+v5.addWidget(current_word_label3)
+
+# Кнопки действий
+buttons_layout3 = QHBoxLayout()
+buttons_layout3.setAlignment(Qt.AlignCenter)
+buttons_layout3.setSpacing(30)
+
+clear_btn3 = QPushButton("✖")
+clear_btn3.setFixedSize(70, 70)
+clear_btn3.setFont(QFont("Arial", 28))
+clear_btn3.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+buttons_layout3.addWidget(clear_btn3)
+
+check_btn3 = QPushButton("✓")
+check_btn3.setFixedSize(70, 70)
+check_btn3.setFont(QFont("Arial", 28))
+check_btn3.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+buttons_layout3.addWidget(check_btn3)
+
+v5.addLayout(buttons_layout3)
+
+hint3 = QLabel("Составь слово из букв:")
+hint3.setFont(QFont("Arial", 12))
+hint3.setStyleSheet("color: #d4a5a5;")
+v5.addWidget(hint3)
+
+h_letters3 = QHBoxLayout()
+h_letters3.setAlignment(Qt.AlignCenter)
+h_letters3.setSpacing(10)
+
+letter_buttons3 = []
+main_word3 = "РЕГИСТРАЦИЯ"
+for letter in main_word3:
+    b = QPushButton(letter)
+    b.setFixedSize(60, 60)
+    b.setFont(QFont("Arial", 18, QFont.Bold))
+    b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+    h_letters3.addWidget(b)
+    letter_buttons3.append(b)
+v5.addLayout(h_letters3)
+
+# Пока кнопки 3 уровня не активны
+def show_message3(text, color):
+    message_label3.setText(text)
+    message_label3.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
+    QTimer.singleShot(1500, lambda: message_label3.setText(""))
+
+for i, btn in enumerate(letter_buttons3):
+    btn.clicked.connect(lambda checked, idx=i: show_message3("Скоро будет готово!", "orange"))
+
+clear_btn3.clicked.connect(lambda: show_message3("Скоро будет готово!", "orange"))
+check_btn3.clicked.connect(lambda: show_message3("Скоро будет готово!", "orange"))
+
 # Переходы
 def to_levels():
     main_win.hide()
@@ -500,6 +612,10 @@ def to_level2():
     levels_win.hide()
     level2_win.show()
 
+def to_level3():
+    levels_win.hide()
+    level3_win.show()
+
 def back_from_level1():
     level1_win.hide()
     levels_win.show()
@@ -508,13 +624,19 @@ def back_from_level2():
     level2_win.hide()
     levels_win.show()
 
+def back_from_level3():
+    level3_win.hide()
+    levels_win.show()
+
 play_btn.clicked.connect(to_levels)
 exit_btn.clicked.connect(main_win.close)
 back_btn.clicked.connect(back_to_main)
 btn1.clicked.connect(to_level1)
 btn2.clicked.connect(to_level2)
+btn3.clicked.connect(to_level3)
 back1.clicked.connect(back_from_level1)
 back2.clicked.connect(back_from_level2)
+back3.clicked.connect(back_from_level3)
 
 main_win.show()
 sys.exit(app.exec_())
