@@ -63,12 +63,17 @@ top.addWidget(back_btn)
 top.addStretch()
 v2.addLayout(top)
 
+
+
 v2.addStretch()
 title2 = QLabel("ВЫБЕРИ УРОВЕНЬ")
 title2.setFont(QFont("Arial", 24, QFont.Bold))
 title2.setAlignment(Qt.AlignCenter)
 title2.setStyleSheet("color: #ffb7b2;")
 v2.addWidget(title2)
+
+v2.addSpacing(50)
+
 
 h_levels = QHBoxLayout()
 h_levels.setAlignment(Qt.AlignCenter)
@@ -84,6 +89,19 @@ for btn in [btn1, btn2, btn3]:
     h_levels.addWidget(btn)
 
 v2.addLayout(h_levels)
+
+v2.addSpacing(20)
+
+h_time = QHBoxLayout()
+h_time.setAlignment(Qt.AlignCenter)
+time_btn = QPushButton("Режим \"На время\"")
+time_btn.setFixedSize(340, 50)
+time_btn.setFont(QFont("Arial", 14, QFont.Bold))
+time_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 25px;")
+time_btn.clicked.connect(lambda: print("Режим на время скоро будет!"))
+h_time.addWidget(time_btn)
+v2.addLayout(h_time)
+
 v2.addStretch()
 
 # ОКНО 1 УРОВНЯ
