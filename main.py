@@ -279,18 +279,17 @@ main_word_time, target_words_time = time_words[random_key]
 
 def load_record():
     global record
-    if os.path.exists("data/time_record.json"):
-        with open("data/time_record.json", "r") as f:
+    if os.path.exists("data/record.json"):
+        with open("data/record.json", "r") as f:
             record = json.load(f).get("record", 0)
     else:
         record = 0
     score_label_time.setText(f"⭐ {score_time}")
     record_label_time.setText(f"🏆 {record}")
 
-
 def save_record():
     os.makedirs("data", exist_ok=True)
-    with open("data/time_record.json", "w") as f:
+    with open("data/record.json", "w") as f:
         json.dump({"record": record}, f)
 
 
@@ -709,6 +708,52 @@ def back_from_level3():
 
 
 def open_time_mode():
+    global score_time, found_words_time, current_word_time, used_indices_time, time_left, random_key, main_word_time, target_words_time, timer
+
+    # Сбрасываем всё для новой игры
+    random_key = random.randint(1, 3)
+    main_word_time, target_words_time = time_words[random_key]
+    score_time = 0
+    found_words_time = []
+    current_word_time = ""
+    used_indices_time = []
+    time_left = 60
+
+    # Обновляем интерфейс
+    update_score_time()
+    update_found_grid()
+    clear_word_time()
+
+    # Очищаем контейнер с буквами
+    for i in reversed(range(h_letters_time.count())):
+        w = h_letters_time.itemAt(i).widget()
+        if w:
+            w.deleteLater()
+
+    # Создаём новые кнопки букв
+    letter_btns_time.clear()
+    for i, letter in enumerate(main_word_time):
+        b = QPushButton(letter)
+        b.setFixedSize(60, 60)
+        b.setFont(QFont("Arial", 18, QFont.Bold))
+        b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
+        h_letters_time.addWidget(b)
+        letter_btns_time.append(b)
+
+    # Сбрасываем таймер
+    timer_label.setText("Время 01:00")
+    if timer:
+        timer.stop()
+    timer = QTimer()
+    timer.timeout.connect(update_timer)
+    timer.start(1000)
+
+    # Включаем кнопки (на случай если предыдущая игра закончилась)
+    clear_time.setEnabled(True)
+    check_time.setEnabled(True)
+
+    # Показываем окно
     levels_win.hide()
     time_win.show()
 
