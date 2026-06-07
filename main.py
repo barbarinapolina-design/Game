@@ -9,7 +9,7 @@ from PyQt5.QtGui import QFont, QIcon
 
 app = QApplication(sys.argv)
 
-# ========== ГЛАВНОЕ МЕНЮ ==========
+# ГЛАВНОЕ МЕНЮ
 main_win = QMainWindow()
 main_win.setWindowTitle("Слова из слова")
 main_win.setFixedSize(500, 450)
@@ -28,7 +28,6 @@ title.setAlignment(Qt.AlignCenter)
 title.setStyleSheet("color: #ffb7b2;")
 layout.addWidget(title)
 
-# Кнопка ИГРАТЬ
 h1 = QHBoxLayout()
 h1.setAlignment(Qt.AlignCenter)
 play_btn = QPushButton("ИГРАТЬ")
@@ -38,7 +37,6 @@ play_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius
 h1.addWidget(play_btn)
 layout.addLayout(h1)
 
-# Кнопка ВЫХОД
 h2 = QHBoxLayout()
 h2.setAlignment(Qt.AlignCenter)
 exit_btn = QPushButton("ВЫХОД")
@@ -48,7 +46,7 @@ exit_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 
 h2.addWidget(exit_btn)
 layout.addLayout(h2)
 
-# ========== ОКНО ВЫБОРА УРОВНЕЙ ==========
+# ОКНО ВЫБОРА УРОВНЕЙ
 levels_win = QMainWindow()
 levels_win.setWindowTitle("Слова из слова - Выбор уровня")
 levels_win.setFixedSize(500, 480)
@@ -103,7 +101,23 @@ v2.addWidget(time_btn, alignment=Qt.AlignCenter)
 
 v2.addStretch()
 
-# ========== ОКНО РЕЖИМА "НА ВРЕМЯ" ==========
+# ДАННЫЕ ДЛЯ РЕЖИМА "НА ВРЕМЯ"
+time_words = {
+    1: ("ОБРАЗОВАНИЕ",
+        ["ЗОВ", "РОВ", "БОР", "БАР", "БРА", "РАЗ", "ВОЗ", "ВОР", "ИВА", "РАНА", "ВАЗА", "ВЕНА", "ВЕРА", "ВИЗА", "ВИНА",
+         "ВОИН", "ЗВОН", "НЕБО", "НЕРВ", "НОРА", "НРАВ", "ОБОИ", "ВЕРБА", "БАЗАР", "БАРАН", "БАРИН", "БАРОН", "ВОРОН",
+         "ЗАБОР", "ЗЕБРА", "ЗЕРНО", "ОБЗОР", "ОБРАЗ", "ОЗЕРО", "БРЕВНО", "БРОНЗА", "ВОРОНА", "ЗВАНИЕ"]),
+    2: ("КАЛЕНДАРЬ",
+        ["АД", "ДАР", "ЕДА", "ЕЛЬ", "АРКА", "ДАЛЬ", "ДАНЬ", "ДЕНЬ", "КАДР", "КАРЕ", "КЕДР", "КЛАД", "КЛАН", "КРАН",
+         "ЛАНЬ", "РАДА", "РАК", "РАНА", "РЕКА", "АРЕАЛ", "АРЕНДА", "АРКАН", "ДЕКАН", "ДРАКА", "ДРЕЛЬ", "КАНАЛ", "НЕДРА",
+         "ЛЕКАРЬ", "РЕДЬКА"]),
+    3: ("СОДЕРЖАНИЕ",
+        ["АД", "ДНО", "ЕДА", "НОЖ", "НОС", "ОСА", "РИС", "РОД", "САД", "СОН", "ДЖИН", "ЖАНР", "ЖЕНА", "НОРА", "ОРДА",
+         "РЖА", "РОСА", "СЕНО", "СОДА", "АДРЕС", "ДЕСНА", "ДРАЖЕ", "НАРОД", "ОРДЕН", "ОСИНА", "РАДИО", "РЕДИС",
+         "РОДИНА", "СЕДИНА", "СРАЖЕНИЕ"])
+}
+
+# ОКНО РЕЖИМА "НА ВРЕМЯ"
 time_win = QMainWindow()
 time_win.setWindowTitle("Слова из слова - Режим «На время»")
 time_win.setFixedSize(800, 900)
@@ -115,46 +129,67 @@ time_win.setCentralWidget(central_time)
 v_time = QVBoxLayout(central_time)
 v_time.setContentsMargins(20, 20, 20, 20)
 
+#  ВЕРХНЯЯ ПАНЕЛЬ (кнопка назад, таймер, очки и рекорд)
 top_time = QHBoxLayout()
+top_time.setAlignment(Qt.AlignCenter)
+
+# Кнопка назад
 back_time = QPushButton("←")
 back_time.setFixedSize(50, 50)
 back_time.setFont(QFont("Arial", 22, QFont.Bold))
 back_time.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 25px;")
 top_time.addWidget(back_time)
+
 top_time.addStretch()
+
+# Таймер
+timer_label = QLabel("Время 01:00")
+timer_label.setFont(QFont("Arial", 24, QFont.Bold))
+timer_label.setAlignment(Qt.AlignCenter)
+timer_label.setStyleSheet("color: #ffb7b2;")
+top_time.addWidget(timer_label)
+
+top_time.addStretch()
+
+# Правая часть: очки и рекорд вертикально
+right_panel = QVBoxLayout()
+right_panel.setAlignment(Qt.AlignRight)
+right_panel.setSpacing(5)
 
 score_label_time = QLabel("⭐ 0")
 score_label_time.setFont(QFont("Arial", 18, QFont.Bold))
 score_label_time.setStyleSheet("color: #ffb7b2;")
-top_time.addWidget(score_label_time)
+right_panel.addWidget(score_label_time)
+
+record_label_time = QLabel("🏆 0")
+record_label_time.setFont(QFont("Arial", 14))
+record_label_time.setStyleSheet("color: #d4a5a5;")
+right_panel.addWidget(record_label_time)
+
+top_time.addLayout(right_panel)
 v_time.addLayout(top_time)
 
-timer_label = QLabel("Время 01:00")
-timer_label.setFont(QFont("Arial", 22, QFont.Bold))
-timer_label.setAlignment(Qt.AlignCenter)
-timer_label.setStyleSheet("color: #ffb7b2;")
-v_time.addWidget(timer_label)
-
+# Место для сообщений
 msg_label_time = QLabel("")
 msg_label_time.setFont(QFont("Arial", 28, QFont.Bold))
 msg_label_time.setAlignment(Qt.AlignCenter)
 v_time.addWidget(msg_label_time)
 
-# Найденные слова — по центру
+# Найденные слова
 found_label = QLabel("Найденные слова:")
-found_label.setFont(QFont("Arial", 14))
-found_label.setStyleSheet("color: #d4a5a5;")
+found_label.setFont(QFont("Arial", 16, QFont.Bold))
+found_label.setStyleSheet("color: #d4a5a5; margin-top: 10px;")
 v_time.addWidget(found_label)
 
 found_container = QWidget()
-found_container.setFixedSize(650, 400)
+found_container.setFixedSize(650, 350)
 found_container.setStyleSheet("background-color: #ffe4e9; border-radius: 10px;")
 found_grid = QGridLayout(found_container)
-found_grid.setSpacing(8)
-found_grid.setAlignment(Qt.AlignCenter)
+found_grid.setSpacing(10)
+found_grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 v_time.addWidget(found_container, alignment=Qt.AlignCenter)
 
-v_time.addStretch()
+v_time.addSpacing(30)
 
 current_word_label_time = QLabel("")
 current_word_label_time.setFont(QFont("Courier", 32, QFont.Bold))
@@ -167,16 +202,55 @@ h_actions = QHBoxLayout()
 h_actions.setAlignment(Qt.AlignCenter)
 h_actions.setSpacing(30)
 
+def clear_word_time():
+    global current_word_time, used_indices_time
+    current_word_time = ""
+    used_indices_time = []
+    current_word_label_time.setText("")
+    update_letters_time()
+
+
+def check_word_time():
+    global score_time, current_word_time, record
+    word = current_word_time.upper()
+    if not word:
+        show_msg_time("Собери слово!", "red")
+        return
+    if word not in target_words_time:
+        show_msg_time(f"'{word}' нет в списке!", "red")
+        clear_word_time()
+        return
+    if word in found_words_time:
+        show_msg_time(f"'{word}' уже найдено!", "orange")
+        clear_word_time()
+        return
+    if Counter(word) <= Counter(main_word_time):
+        score_time += len(word)
+        found_words_time.append(word)
+        update_score_time()
+        update_found_grid()
+        clear_word_time()
+        show_msg_time(f"+{len(word)} очков!", "green")
+        if score_time > record:
+            record = score_time
+            save_record()
+            record_label_time.setText(f"🏆 {record}")
+    else:
+        show_msg_time("Нельзя составить!", "red")
+        clear_word_time()
+
 clear_time = QPushButton("✖")
 clear_time.setFixedSize(70, 70)
 clear_time.setFont(QFont("Arial", 28))
 clear_time.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+clear_time.clicked.connect(clear_word_time)
 h_actions.addWidget(clear_time)
 
 check_time = QPushButton("✓")
 check_time.setFixedSize(70, 70)
 check_time.setFont(QFont("Arial", 28))
 check_time.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+check_time.clicked.connect(check_word_time)
 h_actions.addWidget(check_time)
 
 v_time.addLayout(h_actions)
@@ -189,15 +263,220 @@ v_time.addWidget(hint_time)
 h_letters_time = QHBoxLayout()
 h_letters_time.setAlignment(Qt.AlignCenter)
 h_letters_time.setSpacing(10)
+v_time.addLayout(h_letters_time)
 
-# ========== ДАННЫЕ ДЛЯ УРОВНЕЙ ==========
+# Переменные для режима на время
+score_time = 0
+found_words_time = []
+current_word_time = ""
+used_indices_time = []
+record = 0
+time_left = 60
+timer = None
+random_key = random.randint(1, 3)
+main_word_time, target_words_time = time_words[random_key]
+
+
+def load_record():
+    global record
+    if os.path.exists("data/time_record.json"):
+        with open("data/time_record.json", "r") as f:
+            record = json.load(f).get("record", 0)
+    else:
+        record = 0
+    score_label_time.setText(f"⭐ {score_time}")
+    record_label_time.setText(f"🏆 {record}")
+
+
+def save_record():
+    os.makedirs("data", exist_ok=True)
+    with open("data/time_record.json", "w") as f:
+        json.dump({"record": record}, f)
+
+
+# Создаём буквы
+letter_btns_time = []
+for i, letter in enumerate(main_word_time):
+    b = QPushButton(letter)
+    b.setFixedSize(60, 60)
+    b.setFont(QFont("Arial", 18, QFont.Bold))
+    b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+    b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
+    h_letters_time.addWidget(b)
+    letter_btns_time.append(b)
+
+
+def show_msg_time(text, color):
+    msg_label_time.setText(text)
+    msg_label_time.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
+    QTimer.singleShot(1500, lambda: msg_label_time.setText(""))
+
+
+def update_score_time():
+    score_label_time.setText(f"⭐ {score_time}")
+
+
+def update_found_grid():
+    for i in reversed(range(found_grid.count())):
+        w = found_grid.itemAt(i).widget()
+        if w:
+            w.deleteLater()
+
+    container_width = found_container.width()
+    cols = max(5, container_width // 80)
+
+    for i, w in enumerate(found_words_time):
+        lbl = QLabel(w)
+        lbl.setFont(QFont("Courier", 13, QFont.Bold))
+        lbl.setAlignment(Qt.AlignCenter)
+        lbl.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 5px 8px; border-radius: 10px;")
+        found_grid.addWidget(lbl, i // cols, i % cols)
+
+
+def update_letters_time():
+    for i, btn in enumerate(letter_btns_time):
+        if i in used_indices_time:
+            btn.setEnabled(False)
+            btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
+        else:
+            btn.setEnabled(True)
+            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+
+
+def add_letter_time(idx):
+    global current_word_time
+    if idx not in used_indices_time:
+        current_word_time += main_word_time[idx].lower()
+        used_indices_time.append(idx)
+        current_word_label_time.setText(" ".join(current_word_time.upper()))
+        update_letters_time()
+
+
+def clear_word_time():
+    global current_word_time, used_indices_time
+    current_word_time = ""
+    used_indices_time = []
+    current_word_label_time.setText("")
+    update_letters_time()
+
+
+def check_word_time():
+    global score_time, current_word_time, record
+    word = current_word_time.upper()
+    if not word:
+        show_msg_time("Собери слово!", "red")
+        return
+    if word not in target_words_time:
+        show_msg_time(f"'{word}' нет в списке!", "red")
+        clear_word_time()
+        return
+    if word in found_words_time:
+        show_msg_time(f"'{word}' уже найдено!", "orange")
+        clear_word_time()
+        return
+    if Counter(word) <= Counter(main_word_time):
+        score_time += len(word)
+        found_words_time.append(word)
+        update_score_time()
+        update_found_grid()
+        clear_word_time()
+        show_msg_time(f"+{len(word)} очков!", "green")
+        if score_time > record:
+            record = score_time
+            save_record()
+            record_label_time.setText(f"🏆 {record}")
+    else:
+        show_msg_time("Нельзя составить!", "red")
+        clear_word_time()
+
+
+def start_timer():
+    global timer
+    timer = QTimer()
+    timer.timeout.connect(update_timer)
+    timer.start(1000)
+
+
+def update_timer():
+    global time_left, timer
+    time_left -= 1
+    minutes = time_left // 60
+    seconds = time_left % 60
+    timer_label.setText(f"Время {minutes:02d}:{seconds:02d}")
+    if time_left <= 0:
+        timer.stop()
+        time_out()
+
+
+def time_out():
+    global timer
+    if timer:
+        timer.stop()
+    show_msg_time("ВРЕМЯ ВЫШЛО!", "blue")
+    for btn in letter_btns_time:
+        btn.setEnabled(False)
+    clear_time.setEnabled(False)
+    check_time.setEnabled(False)
+
+
+def restart_game():
+    global random_key, main_word_time, target_words_time, score_time, found_words_time, current_word_time, used_indices_time, time_left, timer, record
+    random_key = random.randint(1, 3)
+    main_word_time, target_words_time = time_words[random_key]
+    score_time = 0
+    found_words_time = []
+    current_word_time = ""
+    used_indices_time = []
+    time_left = 60
+
+    update_score_time()
+    update_found_grid()
+    clear_word_time()
+    record_label_time.setText(f"🏆 {record}")
+
+    # Обновляем буквы
+    for i in reversed(range(h_letters_time.count())):
+        w = h_letters_time.itemAt(i).widget()
+        if w:
+            w.deleteLater()
+    letter_btns_time.clear()
+    for i, letter in enumerate(main_word_time):
+        b = QPushButton(letter)
+        b.setFixedSize(60, 60)
+        b.setFont(QFont("Arial", 18, QFont.Bold))
+        b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
+        h_letters_time.addWidget(b)
+        letter_btns_time.append(b)
+
+    timer_label.setText("Время 01:00")
+    if timer:
+        timer.stop()
+    timer = QTimer()
+    timer.timeout.connect(update_timer)
+    timer.start(1000)
+    clear_time.setEnabled(True)
+    check_time.setEnabled(True)
+
+
+def reset_time_mode():
+    restart_game()
+
+
+load_record()
+start_timer()
+
+# ДАННЫЕ ДЛЯ УРОВНЕЙ
 levels_data = {
     1: {"word": "БОТИНОК", "target": ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]},
     2: {"word": "ПРОГРАММА", "target": ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ", "ГАММА", "МРАМОР"]},
-    3: {"word": "РЕГИСТРАЦИЯ", "target": ["ГИТ", "РИС", "АИСТ", "ГИРЯ", "ИГРА", "СТАЯ", "ТИГР", "РАЦИЯ", "АРЕСТ", "ГРАЦИЯ", "СТАРЕЦ", "РЕГИСТР"]}
+    3: {"word": "РЕГИСТРАЦИЯ",
+        "target": ["ГИТ", "РИС", "АИСТ", "ГИРЯ", "ИГРА", "СТАЯ", "ТИГР", "РАЦИЯ", "АРЕСТ", "ГРАЦИЯ", "СТАРЕЦ",
+                   "РЕГИСТР"]}
 }
 
-# ========== ОКНО УРОВНЯ (общая функция) ==========
+
+# ОКНО УРОВНЯ (общая функция)
 def create_level_window(level_num):
     win = QMainWindow()
     win.setWindowTitle(f"Слова из слова - Уровень {level_num}")
@@ -239,7 +518,7 @@ def create_level_window(level_num):
     found = []
     word_labels = []
     for w in words:
-        lbl = QLabel(" ".join(["."] * len(w)))
+        lbl = QLabel(" ".join(["-"] * len(w)))
         lbl.setFont(QFont("Courier", 20, QFont.Bold))
         lbl.setAlignment(Qt.AlignCenter)
         lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
@@ -286,11 +565,12 @@ def create_level_window(level_num):
 
     letter_btns = []
     main_word = levels_data[level_num]["word"]
-    for letter in main_word:
+    for i, letter in enumerate(main_word):
         b = QPushButton(letter)
         b.setFixedSize(60, 60)
         b.setFont(QFont("Arial", 18, QFont.Bold))
         b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.clicked.connect(lambda checked, idx=i: add_letter(idx))
         h_letters.addWidget(b)
         letter_btns.append(b)
     v.addLayout(h_letters)
@@ -307,10 +587,12 @@ def create_level_window(level_num):
         for i, w in enumerate(words):
             if w in found:
                 word_labels[i].setText(" ".join(w))
-                word_labels[i].setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
+                word_labels[i].setStyleSheet(
+                    "background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
             else:
                 word_labels[i].setText(" ".join(["."] * len(w)))
-                word_labels[i].setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
+                word_labels[i].setStyleSheet(
+                    "background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
 
     def update_letters():
         for i, btn in enumerate(letter_btns):
@@ -378,51 +660,63 @@ def create_level_window(level_num):
 
     return win
 
-# ========== СОЗДАЁМ ОКНА УРОВНЕЙ ==========
+
+#  СОЗДАЁМ ОКНА УРОВНЕЙ
 level1_win = create_level_window(1)
 level2_win = create_level_window(2)
 level3_win = create_level_window(3)
 
-# ========== ПЕРЕХОДЫ ==========
+
+# ПЕРЕХОДЫ
 def to_levels():
     main_win.hide()
     levels_win.show()
+
 
 def back_to_main():
     levels_win.hide()
     main_win.show()
 
+
 def to_level1():
     levels_win.hide()
     level1_win.show()
+
 
 def to_level2():
     levels_win.hide()
     level2_win.show()
 
+
 def to_level3():
     levels_win.hide()
     level3_win.show()
+
 
 def back_from_level1():
     level1_win.hide()
     levels_win.show()
 
+
 def back_from_level2():
     level2_win.hide()
     levels_win.show()
+
 
 def back_from_level3():
     level3_win.hide()
     levels_win.show()
 
+
 def open_time_mode():
     levels_win.hide()
     time_win.show()
 
+
 def close_time_mode():
     time_win.hide()
     levels_win.show()
+
 
 # Подключаем кнопки
 play_btn.clicked.connect(to_levels)
