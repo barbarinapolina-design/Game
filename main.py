@@ -51,9 +51,7 @@ def update_level_buttons():
             btn.setStyleSheet("background-color: #d4d4d4; color: #999; border-radius: 50px;")
 
 
-# ФУНКЦИЯ ДЛЯ ПОДСЧЁТА ОБЩЕГО КОЛИЧЕСТВА ОЧКОВ
 def get_total_score():
-    """Возвращает общее количество очков за все пройденные уровни"""
     progress = load_levels_progress()
     scores = progress.get("scores", {})
     total = sum(scores.values())
@@ -63,7 +61,7 @@ def get_total_score():
 # ГЛАВНОЕ МЕНЮ
 main_win = QMainWindow()
 main_win.setWindowTitle("Слова из слова")
-main_win.setFixedSize(500, 450)
+main_win.showFullScreen()
 main_win.setStyleSheet("background-color: #fff5e6;")
 main_win.setWindowIcon(QIcon("images/word.png"))
 
@@ -100,7 +98,7 @@ layout.addLayout(h2)
 # ОКНО ВЫБОРА УРОВНЕЙ
 levels_win = QMainWindow()
 levels_win.setWindowTitle("Слова из слова - Выбор уровня")
-levels_win.setFixedSize(500, 550)
+levels_win.showFullScreen()
 levels_win.setStyleSheet("background-color: #fff5e6;")
 levels_win.setWindowIcon(QIcon("images/word.png"))
 
@@ -117,7 +115,6 @@ back_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 
 top.addWidget(back_btn)
 top.addStretch()
 
-# Метка для отображения общего количества очков
 total_score_label = QLabel("⭐ 0")
 total_score_label.setFont(QFont("Arial", 18, QFont.Bold))
 total_score_label.setStyleSheet("color: #ffb7b2;")
@@ -170,15 +167,13 @@ bottom.addWidget(reset_btn)
 v2.addLayout(bottom)
 
 
-# ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ОТОБРАЖЕНИЯ ОБЩЕГО СЧЁТА
 def update_total_score_display():
     total = get_total_score()
-    total_score_label.setText(f"⭐ {total}/110")
+    total_score_label.setText(f"⭐ {total}/120")
 
 
 # ФУНКЦИИ ДЛЯ СБРОСА
 def show_reset_dialog():
-    """Показывает диалог подтверждения сброса прогресса"""
     dialog = QDialog(levels_win)
     dialog.setWindowTitle("Сброс прогресса")
     dialog.setFixedSize(550, 200)
@@ -239,7 +234,6 @@ def show_reset_dialog():
 
 
 def reset_all_progress():
-    """Сбрасывает весь прогресс"""
     default_progress = {"unlocked": [1], "scores": {}, "found": {}}
     save_levels_progress(default_progress)
     if os.path.exists("data/record.json"):
@@ -300,7 +294,7 @@ def reset_all_progress():
 
 reset_btn.clicked.connect(show_reset_dialog)
 update_level_buttons()
-update_total_score_display()  # Обновляем отображение очков при загрузке
+update_total_score_display()
 
 # ДАННЫЕ ДЛЯ РЕЖИМА "НА ВРЕМЯ"
 time_words = {
@@ -321,7 +315,7 @@ time_words = {
 # ОКНО РЕЖИМА "НА ВРЕМЯ"
 time_win = QMainWindow()
 time_win.setWindowTitle("Слова из слова - Режим «На время»")
-time_win.setFixedSize(800, 900)
+time_win.showFullScreen()
 time_win.setStyleSheet("background-color: #fff5e6;")
 time_win.setWindowIcon(QIcon("images/word.png"))
 
@@ -448,7 +442,10 @@ def update_found_grid():
         w = found_grid.itemAt(i).widget()
         if w:
             w.deleteLater()
-    cols = max(5, found_container.width() // 80)
+
+    container_width = found_container.width()
+    cols = max(5, container_width // 80)
+
     for i, w in enumerate(found_words_time):
         lbl = QLabel(w)
         lbl.setFont(QFont("Courier", 13, QFont.Bold))
@@ -581,8 +578,7 @@ def time_out():
     record_label.setStyleSheet("color: #c77d7d;")
     layout.addWidget(record_label)
 
-    old_record = record
-    if score_time > old_record and score_time > 0:
+    if score_time > record and score_time > 0:
         new_record_label = QLabel("🎉 НОВЫЙ РЕКОРД! 🎉")
         new_record_label.setFont(QFont("Arial", 14, QFont.Bold))
         new_record_label.setAlignment(Qt.AlignCenter)
@@ -631,7 +627,6 @@ def restart_game():
 
     random_key = random.randint(1, 3)
     main_word_time, target_words_time = time_words[random_key]
-
     score_time = 0
     found_words_time = []
     current_word_time = ""
@@ -648,7 +643,7 @@ def restart_game():
         if w:
             w.deleteLater()
 
-    letter_btns_time.clear()
+    letter_btns_time = []
     for i, letter in enumerate(main_word_time):
         b = QPushButton(letter)
         b.setFixedSize(60, 60)
@@ -664,9 +659,12 @@ def restart_game():
     timer = QTimer()
     timer.timeout.connect(update_timer)
     timer.start(1000)
-
     clear_time.setEnabled(True)
     check_time.setEnabled(True)
+
+
+def reset_time_mode():
+    restart_game()
 
 
 load_record()
@@ -743,11 +741,11 @@ def show_level_complete_dialog(level_num, win, score):
     return result[0]
 
 
-# ОКНО УРОВНЯ
+# ОКНО УРОВНЯ (общая функция)
 def create_level_window(level_num):
     win = QMainWindow()
     win.setWindowTitle(f"Слова из слова - Уровень {level_num}")
-    win.setFixedSize(800, 900 if level_num < 3 else 1100)
+    win.showFullScreen()
     win.setStyleSheet("background-color: #fff5e6;")
     win.setWindowIcon(QIcon("images/word.png"))
 
@@ -840,6 +838,7 @@ def create_level_window(level_num):
         b.setFixedSize(60, 60)
         b.setFont(QFont("Arial", 18, QFont.Bold))
         b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.clicked.connect(lambda checked, idx=i: add_letter(idx))
         h_letters.addWidget(b)
         letter_btns.append(b)
     v.addLayout(h_letters)
@@ -882,6 +881,8 @@ def create_level_window(level_num):
 
     def clear_word():
         nonlocal current_word, used_indices
+        for i in used_indices:
+            letter_btns[i].setEnabled(True)
         current_word = ""
         used_indices = []
         current_lbl.setText("")
@@ -913,7 +914,7 @@ def create_level_window(level_num):
             progress["scores"][str(level_num)] = current_score
             progress["found"][str(level_num)] = found_words
             save_levels_progress(progress)
-            update_total_score_display()  # Обновляем общий счёт после сохранения
+            update_total_score_display()
 
             if len(found_words) >= len(words):
                 show_msg("УРОВЕНЬ ПРОЙДЕН!", "blue")
@@ -926,7 +927,7 @@ def create_level_window(level_num):
                         progress["unlocked"].sort()
                         save_levels_progress(progress)
                         update_level_buttons()
-                        update_total_score_display()  # Обновляем общий счёт после разблокировки
+                        update_total_score_display()
 
                 result = show_level_complete_dialog(level_num, win, current_score)
 
@@ -971,7 +972,7 @@ level3_win = create_level_window(3)
 def to_levels():
     main_win.hide()
     levels_win.show()
-    update_total_score_display()  # Обновляем счёт при показе меню уровней
+    update_total_score_display()
 
 
 def back_to_main():
@@ -998,6 +999,21 @@ def to_level3():
     level3_win = create_level_window(3)
     levels_win.hide()
     level3_win.show()
+
+
+def back_from_level1():
+    level1_win.hide()
+    levels_win.show()
+
+
+def back_from_level2():
+    level2_win.hide()
+    levels_win.show()
+
+
+def back_from_level3():
+    level3_win.hide()
+    levels_win.show()
 
 
 def open_time_mode():
@@ -1046,13 +1062,9 @@ def open_time_mode():
 
 
 def close_time_mode():
-    global timer
-    if timer:
-        timer.stop()
-
     time_win.hide()
     levels_win.show()
-    update_total_score_display()  # Обновляем счёт при возврате в меню уровней
+    update_total_score_display()
 
 
 # Подключаем кнопки
