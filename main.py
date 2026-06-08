@@ -153,6 +153,7 @@ reset_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius:
 bottom.addWidget(reset_btn)
 v2.addLayout(bottom)
 
+
 # ФУНКЦИИ ДЛЯ СБРОСА
 def show_reset_dialog():
     """Показывает диалог подтверждения сброса прогресса"""
@@ -167,26 +168,22 @@ def show_reset_dialog():
     layout.setSpacing(15)
     layout.setContentsMargins(25, 20, 25, 20)
 
-    # Заголовок
     question = QLabel("Вы уверены, что хотите сбросить весь прогресс?")
     question.setFont(QFont("Arial", 12, QFont.Bold))
     question.setWordWrap(True)
     question.setStyleSheet("color: #6b9e8a;")
-    layout.addWidget(question)  # 1 - растягивается
+    layout.addWidget(question)
 
     warn_layout = QHBoxLayout()
     warn_layout.setAlignment(Qt.AlignCenter)
     warn_layout.setSpacing(5)
 
-    # Иконка слева
     icon = QLabel()
     pixmap = QPixmap("images/question.png")
-    # Масштабируем иконку до нужного размера
     pixmap = pixmap.scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     icon.setPixmap(pixmap)
     warn_layout.addWidget(icon)
 
-    # Предупреждение (по центру, с отступом)
     warning = QLabel("Все очки и разблокированные уровни будут потеряны")
     warning.setFont(QFont("Arial", 12))
     warning.setWordWrap(True)
@@ -195,7 +192,6 @@ def show_reset_dialog():
 
     layout.addLayout(warn_layout)
 
-    # Кнопки по центру
     btn_layout = QHBoxLayout()
     btn_layout.setAlignment(Qt.AlignCenter)
     btn_layout.setSpacing(30)
@@ -203,14 +199,14 @@ def show_reset_dialog():
     yes_btn = QPushButton("ДА")
     yes_btn.setFixedSize(100, 40)
     yes_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    yes_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
+    yes_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
     yes_btn.clicked.connect(lambda: dialog.done(QMessageBox.Yes))
     btn_layout.addWidget(yes_btn)
 
     no_btn = QPushButton("НЕТ")
     no_btn.setFixedSize(100, 40)
     no_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    no_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
+    no_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
     no_btn.clicked.connect(lambda: dialog.done(QMessageBox.No))
     btn_layout.addWidget(no_btn)
 
@@ -240,7 +236,6 @@ def reset_all_progress():
     layout.setSpacing(15)
     layout.setContentsMargins(25, 20, 25, 20)
 
-    # Верхняя часть: иконка слева, текст справа
     top_layout = QHBoxLayout()
     top_layout.setSpacing(15)
 
@@ -250,7 +245,6 @@ def reset_all_progress():
     icon.setPixmap(pixmap)
     top_layout.addWidget(icon)
 
-    # Текст справа от иконки
     text = QLabel("Весь прогресс был успешно сброшен.")
     text.setFont(QFont("Arial", 12, QFont.Bold))
     text.setWordWrap(True)
@@ -259,7 +253,6 @@ def reset_all_progress():
 
     layout.addLayout(top_layout)
 
-    # Второй текст
     text2 = QLabel("Теперь вы начинаете игру с первого уровня.")
     text2.setFont(QFont("Arial", 11))
     text2.setAlignment(Qt.AlignCenter)
@@ -267,7 +260,6 @@ def reset_all_progress():
     text2.setStyleSheet("color: #c77d7d;")
     layout.addWidget(text2)
 
-    # Кнопка по центру
     btn_layout = QHBoxLayout()
     btn_layout.setAlignment(Qt.AlignCenter)
 
@@ -286,7 +278,7 @@ def reset_all_progress():
 reset_btn.clicked.connect(show_reset_dialog)
 update_level_buttons()
 
-# ========== ДАННЫЕ ДЛЯ РЕЖИМА "НА ВРЕМЯ" ==========
+# ДАННЫЕ ДЛЯ РЕЖИМА "НА ВРЕМЯ"
 time_words = {
     1: ("ОБРАЗОВАНИЕ",
         ["ЗОВ", "РОВ", "БОР", "БАР", "БРА", "РАЗ", "ВОЗ", "ВОР", "ИВА", "РАНА", "ВАЗА", "ВЕНА", "ВЕРА", "ВИЗА", "ВИНА",
@@ -302,7 +294,7 @@ time_words = {
          "РОДИНА", "СЕДИНА", "СРАЖЕНИЕ"])
 }
 
-# ========== ОКНО РЕЖИМА "НА ВРЕМЯ" ==========
+# ОКНО РЕЖИМА "НА ВРЕМЯ"
 time_win = QMainWindow()
 time_win.setWindowTitle("Слова из слова - Режим «На время»")
 time_win.setFixedSize(800, 900)
@@ -584,7 +576,7 @@ def restart_game():
 load_record()
 start_timer()
 
-# ========== ДАННЫЕ ДЛЯ УРОВНЕЙ ==========
+# ДАННЫЕ ДЛЯ УРОВНЕЙ
 levels_data = {
     1: {"word": "БОТИНОК", "target": ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]},
     2: {"word": "ПРОГРАММА", "target": ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ", "ГАММА", "МРАМОР"]},
@@ -594,7 +586,78 @@ levels_data = {
 }
 
 
-# ========== ОКНО УРОВНЯ ==========
+# ФУНКЦИЯ ДЛЯ ДИАЛОГА ПОСЛЕ УРОВНЯ
+def show_level_complete_dialog(level_num, win, score):
+    dialog = QDialog(win)
+    dialog.setWindowTitle("🎉 Уровень пройден!")
+    dialog.setFixedSize(450, 300)
+    dialog.setModal(True)
+    dialog.setWindowIcon(QIcon("images/word.png"))
+    dialog.setStyleSheet("background-color: #fff5e6;")
+
+    layout = QVBoxLayout(dialog)
+    layout.setSpacing(20)
+    layout.setContentsMargins(30, 30, 30, 30)
+
+    # Заголовок
+    title = QLabel("УРОВЕНЬ ПРОЙДЕН!")
+    title.setFont(QFont("Arial", 22, QFont.Bold))
+    title.setAlignment(Qt.AlignCenter)
+    title.setStyleSheet("color: #ffb7b2;")
+    layout.addWidget(title)
+
+    # Основное сообщение
+    msg = QLabel(f"Вы прошли уровень {level_num}!")
+    msg.setFont(QFont("Arial", 16, QFont.Bold))
+    msg.setAlignment(Qt.AlignCenter)
+    msg.setStyleSheet("color: #6b9e8a;")
+    layout.addWidget(msg)
+
+    # Очки
+    score_label = QLabel(f"Набрано очков: {score}")
+    score_label.setFont(QFont("Arial", 14, QFont.Bold))
+    score_label.setAlignment(Qt.AlignCenter)
+    score_label.setStyleSheet("color: #c77d7d;")
+    layout.addWidget(score_label)
+
+    layout.addSpacing(20)
+
+    # Кнопки
+    btn_layout = QHBoxLayout()
+    btn_layout.setAlignment(Qt.AlignCenter)
+    btn_layout.setSpacing(20)
+
+    result = [0]
+
+    # Кнопка "Следующий уровень"
+    if level_num < 3:
+        next_btn = QPushButton("След. уровень")
+        next_btn.setFixedSize(200, 45)
+        next_btn.setFont(QFont("Arial", 12, QFont.Bold))
+        next_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
+        next_btn.clicked.connect(lambda: [dialog.done(1), result.__setitem__(0, 1)])
+        btn_layout.addWidget(next_btn)
+
+    # Кнопка "В меню"
+    menu_btn = QPushButton("В главное меню")
+    menu_btn.setFixedSize(200, 45)
+    menu_btn.setFont(QFont("Arial", 12, QFont.Bold))
+    menu_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
+    menu_btn.clicked.connect(lambda: [dialog.done(2), result.__setitem__(0, 2)])
+    btn_layout.addWidget(menu_btn)
+
+    layout.addLayout(btn_layout)
+
+    dialog.exec_()
+
+    # Закрываем текущее окно уровня
+    win.hide()
+
+    # Возвращаем результат
+    return result[0]
+
+
+# ОКНО УРОВНЯ
 def create_level_window(level_num):
     win = QMainWindow()
     win.setWindowTitle(f"Слова из слова - Уровень {level_num}")
@@ -650,7 +713,8 @@ def create_level_window(level_num):
 
     current_word = ""
     used_indices = []
-    score = 0
+    current_score = score
+    found_words = found.copy()
 
     current_lbl = QLabel("")
     current_lbl.setFont(QFont("Courier", 32, QFont.Bold))
@@ -690,7 +754,6 @@ def create_level_window(level_num):
         b.setFixedSize(60, 60)
         b.setFont(QFont("Arial", 18, QFont.Bold))
         b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
-        b.clicked.connect(lambda checked, idx=i: add_letter(idx))
         h_letters.addWidget(b)
         letter_btns.append(b)
     v.addLayout(h_letters)
@@ -701,11 +764,11 @@ def create_level_window(level_num):
         QTimer.singleShot(1500, lambda: msg_lbl.setText(""))
 
     def update_score():
-        score_lbl.setText(f"⭐ {score}")
+        score_lbl.setText(f"⭐ {current_score}")
 
     def update_words():
         for i, w in enumerate(words):
-            if w in found:
+            if w in found_words:
                 word_labels[i].setText(" ".join(w))
                 word_labels[i].setStyleSheet(
                     "background-color: #a8e6cf; color: #6b9e8a; padding: 8px; border-radius: 10px;")
@@ -733,15 +796,13 @@ def create_level_window(level_num):
 
     def clear_word():
         nonlocal current_word, used_indices
-        for i in used_indices:
-            letter_btns[i].setEnabled(True)
         current_word = ""
         used_indices = []
         current_lbl.setText("")
         update_letters()
 
     def check_word():
-        nonlocal score, current_word
+        nonlocal current_score, current_word
         word = current_word.upper()
         if not word:
             show_msg("Собери слово!", "red")
@@ -750,36 +811,56 @@ def create_level_window(level_num):
             show_msg(f"'{word}' нет в списке!", "red")
             clear_word()
             return
-        if word in found:
+        if word in found_words:
             show_msg(f"'{word}' уже найдено!", "orange")
             clear_word()
             return
         if Counter(word) <= Counter(main_word):
-            score += len(word)
-            found.append(word)
+            current_score += len(word)
+            found_words.append(word)
             update_score()
             update_words()
             clear_word()
             show_msg(f"+{len(word)} очков!", "green")
-            if len(found) >= len(words):
-                show_msg("УРОВЕНЬ ПРОЙДЕН!", "blue")
 
+            # Сохраняем прогресс
+            progress = load_levels_progress()
+            progress["scores"][str(level_num)] = current_score
+            progress["found"][str(level_num)] = found_words
+            save_levels_progress(progress)
+
+            # Разблокируем следующий уровень (если есть)
+            next_level_num = level_num + 1
+            if next_level_num <= 3:
                 progress = load_levels_progress()
-                next_level = level_num + 1
-                if next_level <= 3 and next_level not in progress["unlocked"]:
-                    progress["unlocked"].append(next_level)
+                if next_level_num not in progress.get("unlocked", []):
+                    progress["unlocked"].append(next_level_num)
                     progress["unlocked"].sort()
                     save_levels_progress(progress)
                     update_level_buttons()
+
+            # ПРОВЕРКА НА ПОБЕДУ (все слова найдены)
+            if len(found_words) >= len(words):
+                show_msg("УРОВЕНЬ ПРОЙДЕН!", "blue")
+
+                # Показываем диалог
+                result = show_level_complete_dialog(level_num, win, current_score)
+
+                # Действуем в зависимости от выбора
+                if result == 1:  # Следующий уровень
+                    if level_num == 1:
+                        to_level2()
+                    elif level_num == 2:
+                        to_level3()
+                else:  # В меню
+                    levels_win.show()
+                return
         else:
             show_msg("Нельзя составить!", "red")
             clear_word()
+            return
 
-        progress = load_levels_progress()
-        progress["scores"][str(level_num)] = score
-        progress["found"][str(level_num)] = found
-        save_levels_progress(progress)
-
+    # Подключаем сигналы кнопок
     for i, btn in enumerate(letter_btns):
         btn.clicked.connect(lambda checked, idx=i: add_letter(idx))
     clear_btn.clicked.connect(clear_word)
@@ -791,6 +872,10 @@ def create_level_window(level_num):
 
     back.clicked.connect(back_to_levels)
 
+    # Восстанавливаем сохранённый прогресс
+    update_score()
+    update_words()
+
     return win
 
 
@@ -800,7 +885,7 @@ level2_win = create_level_window(2)
 level3_win = create_level_window(3)
 
 
-# ========== ПЕРЕХОДЫ ==========
+# ПЕРЕХОДЫ
 def to_levels():
     main_win.hide()
     levels_win.show()
@@ -812,33 +897,25 @@ def back_to_main():
 
 
 def to_level1():
+    # Пересоздаём окно, чтобы загрузить свежий прогресс
+    global level1_win
+    level1_win = create_level_window(1)
     levels_win.hide()
     level1_win.show()
 
 
 def to_level2():
+    global level2_win
+    level2_win = create_level_window(2)
     levels_win.hide()
     level2_win.show()
 
 
 def to_level3():
+    global level3_win
+    level3_win = create_level_window(3)
     levels_win.hide()
     level3_win.show()
-
-
-def back_from_level1():
-    level1_win.hide()
-    levels_win.show()
-
-
-def back_from_level2():
-    level2_win.hide()
-    levels_win.show()
-
-
-def back_from_level3():
-    level3_win.hide()
-    levels_win.show()
 
 
 def open_time_mode():
