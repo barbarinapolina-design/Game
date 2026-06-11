@@ -9,6 +9,9 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap
 
 app = QApplication(sys.argv)
 
+def close_on_esc(window):
+    shortcut = QShortcut(Qt.Key_Escape, window)
+    shortcut.activated.connect(app.quit)
 
 # МАСШТАБИРОВАНИЕ
 def get_screen_size():
@@ -73,6 +76,8 @@ main_win.showFullScreen()
 main_win.setStyleSheet("background-color: #fff5e6;")
 main_win.setWindowIcon(QIcon("images/word.png"))
 
+close_on_esc(main_win)
+
 central = QWidget()
 main_win.setCentralWidget(central)
 layout = QVBoxLayout(central)
@@ -120,6 +125,8 @@ def create_levels_window():
     levels_win.showFullScreen()
     levels_win.setStyleSheet("background-color: #fff5e6;")
     levels_win.setWindowIcon(QIcon("images/word.png"))
+
+    close_on_esc(levels_win)
 
     central2 = QWidget()
     levels_win.setCentralWidget(central2)
@@ -395,6 +402,8 @@ def create_time_window():
     time_win.showFullScreen()
     time_win.setStyleSheet("background-color: #fff5e6;")
     time_win.setWindowIcon(QIcon("images/word.png"))
+
+    close_on_esc(time_win)
 
     central_time = QWidget()
     time_win.setCentralWidget(central_time)
@@ -913,6 +922,8 @@ def create_level_window(level_num):
     win.showFullScreen()
     win.setStyleSheet("background-color: #fff5e6;")
     win.setWindowIcon(QIcon("images/word.png"))
+
+    close_on_esc(win)
 
     central = QWidget()
     win.setCentralWidget(central)
