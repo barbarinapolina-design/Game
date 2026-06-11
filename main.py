@@ -10,6 +10,26 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap
 app = QApplication(sys.argv)
 
 
+# МАСШТАБИРОВАНИЕ
+def get_screen_size():
+    screen = app.primaryScreen()
+    size = screen.availableGeometry()
+    return size.width(), size.height()
+
+
+SCREEN_W, SCREEN_H = get_screen_size()
+BASE_W, BASE_H = 800, 600
+SCALE = min(SCREEN_W / BASE_W, SCREEN_H / BASE_H)
+
+
+def scale(w, h):
+    return int(w * SCALE), int(h * SCALE)
+
+
+def scale_font(size):
+    return int(size * SCALE)
+
+
 # ФУНКЦИИ ДЛЯ СОХРАНЕНИЯ ПРОГРЕССА
 def load_levels_progress():
     if os.path.exists("data/progress.json"):
@@ -39,18 +59,6 @@ def save_record():
         json.dump({"record": record}, f)
 
 
-def update_level_buttons():
-    progress = load_levels_progress()
-    unlocked = progress.get("unlocked", [1])
-    for i, btn in enumerate([btn1, btn2, btn3], 1):
-        if i in unlocked:
-            btn.setEnabled(True)
-            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 50px;")
-        else:
-            btn.setEnabled(False)
-            btn.setStyleSheet("background-color: #d4d4d4; color: #999; border-radius: 50px;")
-
-
 def get_total_score():
     progress = load_levels_progress()
     scores = progress.get("scores", {})
@@ -69,10 +77,10 @@ central = QWidget()
 main_win.setCentralWidget(central)
 layout = QVBoxLayout(central)
 layout.setAlignment(Qt.AlignCenter)
-layout.setSpacing(40)
+layout.setSpacing(scale_font(40))
 
 title = QLabel("СЛОВА ИЗ СЛОВА")
-title.setFont(QFont("Arial", 24, QFont.Bold))
+title.setFont(QFont("Arial", scale_font(48), QFont.Bold))
 title.setAlignment(Qt.AlignCenter)
 title.setStyleSheet("color: #ffb7b2;")
 layout.addWidget(title)
@@ -80,129 +88,169 @@ layout.addWidget(title)
 h1 = QHBoxLayout()
 h1.setAlignment(Qt.AlignCenter)
 play_btn = QPushButton("ИГРАТЬ")
-play_btn.setFixedSize(250, 60)
-play_btn.setFont(QFont("Arial", 16, QFont.Bold))
-play_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+play_btn.setFixedSize(*scale(300, 60))
+play_btn.setFont(QFont("Arial", scale_font(18), QFont.Bold))
+play_btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(30)}px;")
 h1.addWidget(play_btn)
 layout.addLayout(h1)
 
 h2 = QHBoxLayout()
 h2.setAlignment(Qt.AlignCenter)
 exit_btn = QPushButton("ВЫХОД")
-exit_btn.setFixedSize(200, 50)
-exit_btn.setFont(QFont("Arial", 14))
-exit_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 25px;")
+exit_btn.setFixedSize(*scale(200, 50))
+exit_btn.setFont(QFont("Arial", scale_font(16)))
+exit_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(25)}px;")
 h2.addWidget(exit_btn)
 layout.addLayout(h2)
 
-# ОКНО ВЫБОРА УРОВНЕЙ
-levels_win = QMainWindow()
-levels_win.setWindowTitle("Слова из слова - Выбор уровня")
-levels_win.showFullScreen()
-levels_win.setStyleSheet("background-color: #fff5e6;")
-levels_win.setWindowIcon(QIcon("images/word.png"))
+# ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+levels_win = None
+btn1 = btn2 = btn3 = None
+back_btn = None
+total_score_label = None
+reset_btn = None
+time_btn = None
 
-central2 = QWidget()
-levels_win.setCentralWidget(central2)
-v2 = QVBoxLayout(central2)
-v2.setContentsMargins(20, 20, 20, 20)
 
-top = QHBoxLayout()
-back_btn = QPushButton("назад")
-back_btn.setFixedSize(100, 40)
-back_btn.setFont(QFont("Arial", 16, QFont.Bold))
-back_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
-top.addWidget(back_btn)
-top.addStretch()
+def create_levels_window():
+    global levels_win, btn1, btn2, btn3, back_btn, total_score_label, reset_btn, time_btn
 
-total_score_label = QLabel("⭐ 0")
-total_score_label.setFont(QFont("Arial", 18, QFont.Bold))
-total_score_label.setStyleSheet("color: #ffb7b2;")
-top.addWidget(total_score_label)
+    levels_win = QMainWindow()
+    levels_win.setWindowTitle("Слова из слова - Выбор уровня")
+    levels_win.showFullScreen()
+    levels_win.setStyleSheet("background-color: #fff5e6;")
+    levels_win.setWindowIcon(QIcon("images/word.png"))
 
-v2.addLayout(top)
+    central2 = QWidget()
+    levels_win.setCentralWidget(central2)
+    v2 = QVBoxLayout(central2)
+    v2.setContentsMargins(scale(20, 20)[0], scale(20, 20)[1],
+                          scale(20, 20)[0], scale(20, 20)[1])
 
-v2.addStretch()
-title2 = QLabel("ВЫБЕРИ УРОВЕНЬ")
-title2.setFont(QFont("Arial", 24, QFont.Bold))
-title2.setAlignment(Qt.AlignCenter)
-title2.setStyleSheet("color: #ffb7b2;")
-v2.addWidget(title2)
+    top = QHBoxLayout()
+    back_btn = QPushButton("назад")
+    back_btn.setFixedSize(*scale(100, 40))
+    back_btn.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+    back_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
+    top.addWidget(back_btn)
+    top.addStretch()
 
-v2.addSpacing(50)
+    total_score_label = QLabel("⭐ 0")
+    total_score_label.setFont(QFont("Arial", scale_font(18), QFont.Bold))
+    total_score_label.setStyleSheet("color: #ffb7b2;")
+    top.addWidget(total_score_label)
 
-h_levels = QHBoxLayout()
-h_levels.setAlignment(Qt.AlignCenter)
-h_levels.setSpacing(30)
+    v2.addLayout(top)
 
-btn1 = QPushButton("1")
-btn2 = QPushButton("2")
-btn3 = QPushButton("3")
-for btn in [btn1, btn2, btn3]:
-    btn.setFixedSize(100, 100)
-    btn.setFont(QFont("Arial", 32, QFont.Bold))
-    btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 50px;")
-    h_levels.addWidget(btn)
+    v2.addStretch()
+    title2 = QLabel("ВЫБЕРИ УРОВЕНЬ")
+    title2.setFont(QFont("Arial", scale_font(36), QFont.Bold))
+    title2.setAlignment(Qt.AlignCenter)
+    title2.setStyleSheet("color: #ffb7b2;")
+    v2.addWidget(title2)
 
-v2.addLayout(h_levels)
+    v2.addSpacing(scale_font(50))
 
-v2.addSpacing(20)
+    h_levels = QHBoxLayout()
+    h_levels.setAlignment(Qt.AlignCenter)
+    h_levels.setSpacing(scale_font(30))
 
-time_btn = QPushButton("Режим \"На время\"")
-time_btn.setFixedSize(340, 50)
-time_btn.setFont(QFont("Arial", 14, QFont.Bold))
-time_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 25px;")
-v2.addWidget(time_btn, alignment=Qt.AlignCenter)
+    btn1 = QPushButton("1")
+    btn2 = QPushButton("2")
+    btn3 = QPushButton("3")
+    for btn in [btn1, btn2, btn3]:
+        btn.setFixedSize(*scale(100, 100))
+        btn.setFont(QFont("Arial", scale_font(32), QFont.Bold))
+        btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(50)}px;")
+        h_levels.addWidget(btn)
 
-v2.addStretch()
+    v2.addLayout(h_levels)
 
-bottom = QHBoxLayout()
-bottom.setAlignment(Qt.AlignRight)
+    v2.addSpacing(scale_font(20))
 
-reset_btn = QPushButton("Сбросить прогресс")
-reset_btn.setFixedSize(230, 40)
-reset_btn.setFont(QFont("Arial", 12, QFont.Bold))
-reset_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px")
-bottom.addWidget(reset_btn)
-v2.addLayout(bottom)
+    time_btn = QPushButton("Режим \"На время\"")
+    time_btn.setFixedSize(*scale(340, 50))
+    time_btn.setFont(QFont("Arial", scale_font(14), QFont.Bold))
+    time_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(25)}px;")
+    v2.addWidget(time_btn, alignment=Qt.AlignCenter)
+
+    v2.addStretch()
+
+    bottom = QHBoxLayout()
+    bottom.setAlignment(Qt.AlignRight)
+
+    reset_btn = QPushButton("Сбросить прогресс")
+    reset_btn.setFixedSize(*scale(230, 40))
+    reset_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    reset_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px")
+    bottom.addWidget(reset_btn)
+    v2.addLayout(bottom)
+
+    update_level_buttons()
+    update_total_score_display()
+
+    back_btn.clicked.connect(back_to_main)
+    reset_btn.clicked.connect(show_reset_dialog)
+    btn1.clicked.connect(to_level1)
+    btn2.clicked.connect(to_level2)
+    btn3.clicked.connect(to_level3)
+    time_btn.clicked.connect(open_time_mode)
+
+
+def update_level_buttons():
+    if btn1 is None:
+        return
+    progress = load_levels_progress()
+    unlocked = progress.get("unlocked", [1])
+    for i, btn in enumerate([btn1, btn2, btn3], 1):
+        if i in unlocked:
+            btn.setEnabled(True)
+            btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(50)}px;")
+        else:
+            btn.setEnabled(False)
+            btn.setStyleSheet(f"background-color: #d4d4d4; color: #999; border-radius: {scale_font(50)}px;")
 
 
 def update_total_score_display():
+    if total_score_label is None:
+        return
     total = get_total_score()
-    total_score_label.setText(f"⭐ {total}/120")
+    total_score_label.setText(f"⭐ {total}/145")
 
 
-# ФУНКЦИИ ДЛЯ СБРОСА
 def show_reset_dialog():
     dialog = QDialog(levels_win)
     dialog.setWindowTitle("Сброс прогресса")
-    dialog.setFixedSize(550, 200)
+    dialog.setFixedSize(*scale(550, 200))
     dialog.setModal(True)
     dialog.setWindowIcon(QIcon("images/word.png"))
     dialog.setStyleSheet("background-color: #fff5e6;")
 
     layout = QVBoxLayout(dialog)
-    layout.setSpacing(15)
-    layout.setContentsMargins(25, 20, 25, 20)
+    layout.setSpacing(scale_font(15))
+    layout.setContentsMargins(scale(25, 25)[0], scale(20, 20)[1],
+                              scale(25, 25)[0], scale(20, 20)[1])
 
     question = QLabel("Вы уверены, что хотите сбросить весь прогресс?")
-    question.setFont(QFont("Arial", 12, QFont.Bold))
+    question.setFont(QFont("Arial", scale_font(12), QFont.Bold))
     question.setWordWrap(True)
     question.setStyleSheet("color: #6b9e8a;")
     layout.addWidget(question)
 
     warn_layout = QHBoxLayout()
     warn_layout.setAlignment(Qt.AlignCenter)
-    warn_layout.setSpacing(5)
+    warn_layout.setSpacing(scale_font(5))
 
     icon = QLabel()
     pixmap = QPixmap("images/question.png")
-    pixmap = pixmap.scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-    icon.setPixmap(pixmap)
+    if not pixmap.isNull():
+        pixmap = pixmap.scaled(scale(48, 48)[0], scale(48, 48)[1],
+                               Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon.setPixmap(pixmap)
     warn_layout.addWidget(icon)
 
     warning = QLabel("Все очки и разблокированные уровни будут потеряны")
-    warning.setFont(QFont("Arial", 12))
+    warning.setFont(QFont("Arial", scale_font(12)))
     warning.setWordWrap(True)
     warning.setStyleSheet("color: #c77d7d;")
     warn_layout.addWidget(warning, 1)
@@ -211,19 +259,19 @@ def show_reset_dialog():
 
     btn_layout = QHBoxLayout()
     btn_layout.setAlignment(Qt.AlignCenter)
-    btn_layout.setSpacing(30)
+    btn_layout.setSpacing(scale_font(30))
 
     yes_btn = QPushButton("ДА")
-    yes_btn.setFixedSize(100, 40)
-    yes_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    yes_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
+    yes_btn.setFixedSize(*scale(100, 40))
+    yes_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    yes_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
     yes_btn.clicked.connect(lambda: dialog.done(QMessageBox.Yes))
     btn_layout.addWidget(yes_btn)
 
     no_btn = QPushButton("НЕТ")
-    no_btn.setFixedSize(100, 40)
-    no_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    no_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
+    no_btn.setFixedSize(*scale(100, 40))
+    no_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    no_btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(20)}px;")
     no_btn.clicked.connect(lambda: dialog.done(QMessageBox.No))
     btn_layout.addWidget(no_btn)
 
@@ -243,26 +291,29 @@ def reset_all_progress():
 
     dialog = QDialog(levels_win)
     dialog.setWindowTitle("Прогресс сброшен")
-    dialog.setFixedSize(430, 180)
+    dialog.setFixedSize(*scale(430, 180))
     dialog.setModal(True)
     dialog.setWindowIcon(QIcon("images/word.png"))
     dialog.setStyleSheet("background-color: #fff5e6;")
 
     layout = QVBoxLayout(dialog)
-    layout.setSpacing(15)
-    layout.setContentsMargins(25, 20, 25, 20)
+    layout.setSpacing(scale_font(15))
+    layout.setContentsMargins(scale(25, 25)[0], scale(20, 20)[1],
+                              scale(25, 25)[0], scale(20, 20)[1])
 
     top_layout = QHBoxLayout()
-    top_layout.setSpacing(15)
+    top_layout.setSpacing(scale_font(15))
 
     icon = QLabel()
     pixmap = QPixmap("images/success.png")
-    pixmap = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-    icon.setPixmap(pixmap)
+    if not pixmap.isNull():
+        pixmap = pixmap.scaled(scale(32, 32)[0], scale(32, 32)[1],
+                               Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon.setPixmap(pixmap)
     top_layout.addWidget(icon)
 
     text = QLabel("Весь прогресс был успешно сброшен.")
-    text.setFont(QFont("Arial", 12, QFont.Bold))
+    text.setFont(QFont("Arial", scale_font(12), QFont.Bold))
     text.setWordWrap(True)
     text.setStyleSheet("color: #6b9e8a;")
     top_layout.addWidget(text, 1)
@@ -270,7 +321,7 @@ def reset_all_progress():
     layout.addLayout(top_layout)
 
     text2 = QLabel("Теперь вы начинаете игру с первого уровня.")
-    text2.setFont(QFont("Arial", 11))
+    text2.setFont(QFont("Arial", scale_font(11)))
     text2.setAlignment(Qt.AlignCenter)
     text2.setWordWrap(True)
     text2.setStyleSheet("color: #c77d7d;")
@@ -280,9 +331,9 @@ def reset_all_progress():
     btn_layout.setAlignment(Qt.AlignCenter)
 
     ok_btn = QPushButton("ОК")
-    ok_btn.setFixedSize(100, 40)
-    ok_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    ok_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
+    ok_btn.setFixedSize(*scale(100, 40))
+    ok_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    ok_btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(20)}px;")
     ok_btn.clicked.connect(dialog.accept)
     btn_layout.addWidget(ok_btn)
 
@@ -292,130 +343,36 @@ def reset_all_progress():
     update_total_score_display()
 
 
-reset_btn.clicked.connect(show_reset_dialog)
-update_level_buttons()
-update_total_score_display()
-
 # ДАННЫЕ ДЛЯ РЕЖИМА "НА ВРЕМЯ"
 time_words = {
     1: ("ОБРАЗОВАНИЕ",
-        ["ЗОВ", "РОВ", "БОР", "БАР", "БРА", "РАЗ", "ВОЗ", "ВОР", "ИВА", "РАНА", "ВАЗА", "ВЕНА", "ВЕРА", "ВИЗА", "ВИНА",
-         "ВОИН", "ЗВОН", "НЕБО", "НЕРВ", "НОРА", "НРАВ", "ОБОИ", "ВЕРБА", "БАЗАР", "БАРАН", "БАРИН", "БАРОН", "ВОРОН",
-         "ЗАБОР", "ЗЕБРА", "ЗЕРНО", "ОБЗОР", "ОБРАЗ", "ОЗЕРО", "БРЕВНО", "БРОНЗА", "ВОРОНА", "ЗВАНИЕ"]),
+        ["ЗОВ", "РОВ", "БОР", "БАР", "БРА", "РАЗ", "ВОЗ", "ВОР", "ИВА", "НИЗ", "РАНА", "ВАЗА", "ВЕНА", "ВЕРА", "ВИЗА", "ВИНА", "ВИНО", "ЗОНА", "РОЗА",
+         "ВОИН", "ЗВОН", "НЕБО", "НЕРВ", "НОРА", "НРАВ", "ОЗОН", "ОБОИ","ВЗОР", "НАВОЗ", "ВЕРБА", "БРАВО", "БАЗАР", "БАРАН", "БАРИН", "БАРОН", "ВОРОН",
+          "ВАРАН","ЗАБОР", "ЗЕБРА", "ЗЕРНО", "ОБЗОР", "ОБРАЗ", "ОЗЕРО", "БРЕВНО", "БРОНЗА", "ВОРОНА", "ЗВАНИЕ"]),
     2: ("КАЛЕНДАРЬ",
-        ["АД", "ДАР", "ЕДА", "ЕЛЬ", "АРКА", "ДАЛЬ", "ДАНЬ", "ДЕНЬ", "КАДР", "КАРЕ", "КЕДР", "КЛАД", "КЛАН", "КРАН",
-         "ЛАНЬ", "РАДА", "РАК", "РАНА", "РЕКА", "АРЕАЛ", "АРЕНДА", "АРКАН", "ДЕКАН", "ДРАКА", "ДРЕЛЬ", "КАНАЛ", "НЕДРА",
-         "ЛЕКАРЬ", "РЕДЬКА"]),
+        ["АД", "КАЛ", "ДАР", "ЕДА", "ЕЛЬ", "АРКА", "ДАЛЬ", "ДАНЬ", "ДЕНЬ", "КАДР", "КАРЕ", "КЕДР", "КЛАД", "КЛАН", "КРАН", "КАРА",
+         "ЛАНЬ", "ЛАРЬ", "ЛЕНЬ", "РАДА", "РАК", "РАНА", "РЕКА", "АРЕАЛ", "АРКАН", "ДЕКАН", "ДРАКА", "ДРЕЛЬ", "КАНАЛ", "НЕДРА",
+         "ЛЕКАРЬ", "АРЕНДА", "РЕДЬКА"]),
     3: ("СОДЕРЖАНИЕ",
-        ["АД", "ДНО", "ЕДА", "НОЖ", "НОС", "ОСА", "РИС", "РОД", "САД", "СОН", "ДЖИН", "ЖАНР", "ЖЕНА", "НОРА", "ОРДА",
-         "РЖА", "РОСА", "СЕНО", "СОДА", "АДРЕС", "ДЕСНА", "ДРАЖЕ", "НАРОД", "ОРДЕН", "ОСИНА", "РАДИО", "РЕДИС",
-         "РОДИНА", "СЕДИНА", "СРАЖЕНИЕ"])
+        ["АД", "ОР", "СОР", "ДАР", "ДНО", "ЕДА", "НОЖ", "НОС", "ОСА", "РИС", "РОД", "САД", "СОН", "ЖАР", "ЖИР", "ЖОР", "РОЖА", "ДЖИН", "ЖАНР", "ЖЕНА",
+         "НОРА", "ОРДА", "РЖА", "РОСА", "СОРА", "СЕНО", "СОДА", "АДРЕС", "ДЕСНА", "ДРАЖЕ", "ДРЕНАЖ", "НАРОД", "ОРДЕН", "ОСИНА", "РАДИО", "РЕДИС",
+         "РОДИНА", "СЕДИНА", "РЖАНИЕ", "СРАЖЕНИЕ"])
 }
 
 # ОКНО РЕЖИМА "НА ВРЕМЯ"
-time_win = QMainWindow()
-time_win.setWindowTitle("Слова из слова - Режим «На время»")
-time_win.showFullScreen()
-time_win.setStyleSheet("background-color: #fff5e6;")
-time_win.setWindowIcon(QIcon("images/word.png"))
-
-central_time = QWidget()
-time_win.setCentralWidget(central_time)
-v_time = QVBoxLayout(central_time)
-v_time.setContentsMargins(20, 20, 20, 20)
-
-top_time = QHBoxLayout()
-top_time.setAlignment(Qt.AlignCenter)
-
-back_time = QPushButton("назад")
-back_time.setFixedSize(100, 40)
-back_time.setFont(QFont("Arial", 16, QFont.Bold))
-back_time.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
-top_time.addWidget(back_time)
-
-top_time.addStretch()
-
-timer_label = QLabel("Время 01:00")
-timer_label.setFont(QFont("Arial", 24, QFont.Bold))
-timer_label.setAlignment(Qt.AlignCenter)
-timer_label.setStyleSheet("color: #ffb7b2;")
-top_time.addWidget(timer_label)
-
-top_time.addStretch()
-
-right_panel = QVBoxLayout()
-right_panel.setAlignment(Qt.AlignRight)
-right_panel.setSpacing(5)
-
-score_label_time = QLabel("⭐ 0")
-score_label_time.setFont(QFont("Arial", 18, QFont.Bold))
-score_label_time.setStyleSheet("color: #ffb7b2;")
-right_panel.addWidget(score_label_time)
-
-record_label_time = QLabel("🏆 0")
-record_label_time.setFont(QFont("Arial", 14))
-record_label_time.setStyleSheet("color: #d4a5a5;")
-right_panel.addWidget(record_label_time)
-
-top_time.addLayout(right_panel)
-v_time.addLayout(top_time)
-
-msg_label_time = QLabel("")
-msg_label_time.setFont(QFont("Arial", 28, QFont.Bold))
-msg_label_time.setAlignment(Qt.AlignCenter)
-v_time.addWidget(msg_label_time)
-
-found_label = QLabel("Найденные слова:")
-found_label.setFont(QFont("Arial", 16, QFont.Bold))
-found_label.setStyleSheet("color: #d4a5a5; margin-top: 10px;")
-v_time.addWidget(found_label)
-
-found_container = QWidget()
-found_container.setFixedSize(650, 350)
-found_container.setStyleSheet("background-color: #ffe4e9; border-radius: 10px;")
-found_grid = QGridLayout(found_container)
-found_grid.setSpacing(10)
-found_grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-v_time.addWidget(found_container, alignment=Qt.AlignCenter)
-
-v_time.addSpacing(30)
-
-current_word_label_time = QLabel("")
-current_word_label_time.setFont(QFont("Courier", 32, QFont.Bold))
-current_word_label_time.setAlignment(Qt.AlignCenter)
-current_word_label_time.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
-current_word_label_time.setMinimumHeight(80)
-v_time.addWidget(current_word_label_time)
-
-h_actions = QHBoxLayout()
-h_actions.setAlignment(Qt.AlignCenter)
-h_actions.setSpacing(30)
-
-clear_time = QPushButton("✖")
-clear_time.setFixedSize(70, 70)
-clear_time.setFont(QFont("Arial", 28))
-clear_time.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
-h_actions.addWidget(clear_time)
-
-check_time = QPushButton("✓")
-check_time.setFixedSize(70, 70)
-check_time.setFont(QFont("Arial", 28))
-check_time.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
-h_actions.addWidget(check_time)
-
-v_time.addLayout(h_actions)
-
-hint_time = QLabel("Составь слово из букв:")
-hint_time.setFont(QFont("Arial", 12))
-hint_time.setStyleSheet("color: #d4a5a5;")
-v_time.addWidget(hint_time)
-
-h_letters_time = QHBoxLayout()
-h_letters_time.setAlignment(Qt.AlignCenter)
-h_letters_time.setSpacing(10)
-v_time.addLayout(h_letters_time)
-
-# Переменные для режима на время
+time_win = None
+back_time = None
+timer_label = None
+score_label_time = None
+record_label_time = None
+msg_label_time = None
+found_container_time = None
+found_layout_time = None
+current_word_label_time = None
+clear_time = None
+check_time = None
+h_letters_time = None
+letter_btns_time = []
 score_time = 0
 found_words_time = []
 current_word_time = ""
@@ -423,49 +380,212 @@ used_indices_time = []
 record = 0
 time_left = 60
 timer = None
-random_key = random.randint(1, 3)
-main_word_time, target_words_time = time_words[random_key]
+random_key = 1
+main_word_time = ""
+target_words_time = []
 
 
-def show_msg_time(text, color):
-    msg_label_time.setText(text)
-    msg_label_time.setStyleSheet(f"color: {color}; font-size: 28px; font-weight: bold;")
-    QTimer.singleShot(1500, lambda: msg_label_time.setText(""))
+def create_time_window():
+    global time_win, back_time, timer_label, score_label_time, record_label_time
+    global msg_label_time, found_container_time, found_layout_time, current_word_label_time
+    global clear_time, check_time, h_letters_time, letter_btns_time
+
+    time_win = QMainWindow()
+    time_win.setWindowTitle("Слова из слова - Режим «На время»")
+    time_win.showFullScreen()
+    time_win.setStyleSheet("background-color: #fff5e6;")
+    time_win.setWindowIcon(QIcon("images/word.png"))
+
+    central_time = QWidget()
+    time_win.setCentralWidget(central_time)
+    v_time = QVBoxLayout(central_time)
+    v_time.setSpacing(scale_font(10))
+    v_time.setContentsMargins(scale(30, 30)[0], scale(15, 15)[1],
+                              scale(30, 30)[0], scale(15, 15)[1])
+
+    # Верхняя панель
+    top_time = QHBoxLayout()
+    top_time.setAlignment(Qt.AlignCenter)
+
+    back_time = QPushButton("назад")
+    back_time.setFixedSize(*scale(100, 40))
+    back_time.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+    back_time.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
+    top_time.addWidget(back_time)
+
+    top_time.addStretch()
+
+    timer_label = QLabel("Время 01:00")
+    timer_label.setFont(QFont("Arial", scale_font(22), QFont.Bold))
+    timer_label.setAlignment(Qt.AlignCenter)
+    timer_label.setStyleSheet("color: #ffb7b2;")
+    top_time.addWidget(timer_label)
+
+    top_time.addStretch()
+
+    right_panel = QVBoxLayout()
+    right_panel.setAlignment(Qt.AlignRight)
+    right_panel.setSpacing(scale_font(3))
+
+    score_label_time = QLabel("⭐ 0")
+    score_label_time.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+    score_label_time.setStyleSheet("color: #ffb7b2;")
+    right_panel.addWidget(score_label_time)
+
+    record_label_time = QLabel("🏆 0")
+    record_label_time.setFont(QFont("Arial", scale_font(13)))
+    record_label_time.setStyleSheet("color: #d4a5a5;")
+    right_panel.addWidget(record_label_time)
+
+    top_time.addLayout(right_panel)
+    v_time.addLayout(top_time)
+
+    # Сообщение
+    msg_label_time = QLabel("")
+    msg_label_time.setFont(QFont("Arial", scale_font(24), QFont.Bold))
+    msg_label_time.setAlignment(Qt.AlignCenter)
+    msg_label_time.setMinimumHeight(scale_font(40))
+    v_time.addWidget(msg_label_time)
+
+    found_title = QLabel("Найденные слова:")
+    found_title.setFont(QFont("Arial", scale_font(14), QFont.Bold))
+    found_title.setStyleSheet("color: #d4a5a5;")
+    v_time.addWidget(found_title)
+
+    found_container_time = QWidget()
+    found_container_time.setStyleSheet("background-color: #ffe4e9; border-radius: 15px;")
+    found_container_time.setFixedWidth(scale_font(400))
+    found_layout_time = QGridLayout(found_container_time)
+    found_layout_time.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+    found_layout_time.setSpacing(scale_font(8))
+    found_layout_time.setContentsMargins(scale(10, 10)[0], scale(10, 10)[1],
+                                         scale(10, 10)[0], scale(10, 10)[1])
+
+    found_scroll = QScrollArea()
+    found_scroll.setWidgetResizable(True)
+    found_scroll.setStyleSheet("""
+        QScrollArea {
+            background-color: #ffe4e9;
+            border-radius: 15px;
+            border: none;
+        }
+        QScrollBar:vertical {
+            background: #ffe4e9;
+            width: 8px;
+            border-radius: 4px;
+        }
+        QScrollBar::handle:vertical {
+            background: #c77d7d;
+            border-radius: 4px;
+        }
+    """)
+    found_scroll.setWidget(found_container_time)
+    found_scroll.setFixedHeight(scale_font(180))
+    found_scroll.setFixedWidth(scale_font(400))
+    v_time.addWidget(found_scroll, alignment=Qt.AlignCenter)
+
+    v_time.addSpacing(scale_font(5))
+
+    # Текущее слово
+    current_word_label_time = QLabel("")
+    current_word_label_time.setFont(QFont("Courier", scale_font(32), QFont.Bold))
+    current_word_label_time.setAlignment(Qt.AlignCenter)
+    current_word_label_time.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 12px; border-radius: 15px;")
+    current_word_label_time.setMinimumHeight(scale_font(60))
+    v_time.addWidget(current_word_label_time)
+
+    # Кнопки действий
+    h_actions = QHBoxLayout()
+    h_actions.setAlignment(Qt.AlignCenter)
+    h_actions.setSpacing(scale_font(25))
+
+    clear_time = QPushButton("✖")
+    clear_time.setFixedSize(*scale(65, 65))
+    clear_time.setFont(QFont("Arial", scale_font(30)))
+    clear_time.setStyleSheet(f"""
+        QPushButton {{
+            background-color: #ffb7b2;
+            color: white;
+            border-radius: {scale_font(32)}px;
+        }}
+    """)
+    h_actions.addWidget(clear_time)
+
+    check_time = QPushButton("✓")
+    check_time.setFixedSize(*scale(65, 65))
+    check_time.setFont(QFont("Arial", scale_font(30)))
+    check_time.setStyleSheet(f"""
+        QPushButton {{
+            background-color: #a8e6cf;
+            color: white;
+            border-radius: {scale_font(32)}px;
+        }}
+    """)
+    h_actions.addWidget(check_time)
+
+    v_time.addLayout(h_actions)
+
+    v_time.addSpacing(scale_font(5))
+
+    hint = QLabel("Составь слово из букв:")
+    hint.setFont(QFont("Arial", scale_font(12)))
+    hint.setStyleSheet("color: #d4a5a5;")
+    v_time.addWidget(hint)
+
+    # Буквы
+    letters_widget = QWidget()
+    h_letters_time = QHBoxLayout(letters_widget)
+    h_letters_time.setAlignment(Qt.AlignCenter)
+    h_letters_time.setSpacing(scale_font(8))
+    h_letters_time.setContentsMargins(scale(5, 5)[0], scale(5, 5)[1],
+                                      scale(5, 5)[0], scale(5, 5)[1])
+
+    letters_scroll = QScrollArea()
+    letters_scroll.setWidgetResizable(True)
+    letters_scroll.setStyleSheet("background: transparent; border: none;")
+    letters_scroll.setMaximumHeight(scale_font(80))
+    letters_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+    letters_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    letters_scroll.setWidget(letters_widget)
+    v_time.addWidget(letters_scroll)
+
+    clear_time.clicked.connect(clear_word_time)
+    check_time.clicked.connect(check_word_time)
+    back_time.clicked.connect(close_time_mode)
 
 
-def update_score_time():
-    score_label_time.setText(f"⭐ {score_time}")
+def update_found_words_display():
+    if found_layout_time is None:
+        return
 
-
-def update_found_grid():
-    for i in reversed(range(found_grid.count())):
-        w = found_grid.itemAt(i).widget()
+    for i in reversed(range(found_layout_time.count())):
+        w = found_layout_time.itemAt(i).widget()
         if w:
             w.deleteLater()
 
-    container_width = found_container.width()
-    cols = max(5, container_width // 80)
-
-    for i, w in enumerate(found_words_time):
-        lbl = QLabel(w)
-        lbl.setFont(QFont("Courier", 13, QFont.Bold))
+    cols = 6
+    for i, word in enumerate(found_words_time):
+        lbl = QLabel(word)
+        lbl.setFont(QFont("Courier", scale_font(14), QFont.Bold))
         lbl.setAlignment(Qt.AlignCenter)
-        lbl.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; padding: 5px 8px; border-radius: 10px;")
-        found_grid.addWidget(lbl, i // cols, i % cols)
+        lbl.setStyleSheet(f"""
+            background-color: #a8e6cf;
+            color: #6b9e8a;
+            padding: {scale_font(5)}px {scale_font(10)}px;
+            border-radius: {scale_font(10)}px;
+        """)
+        found_layout_time.addWidget(lbl, i // cols, i % cols)
 
 
-def update_letters_time():
-    for i, btn in enumerate(letter_btns_time):
-        if i in used_indices_time:
-            btn.setEnabled(False)
-            btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
-        else:
-            btn.setEnabled(True)
-            btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+def show_msg_time(text, color):
+    if msg_label_time:
+        msg_label_time.setText(text)
+        msg_label_time.setStyleSheet(f"color: {color}; font-size: {scale_font(24)}px; font-weight: bold;")
+        QTimer.singleShot(1500, lambda: msg_label_time.setText(""))
 
 
 def add_letter_time(idx):
-    global current_word_time
+    global current_word_time, used_indices_time
     if idx not in used_indices_time:
         current_word_time += main_word_time[idx].lower()
         used_indices_time.append(idx)
@@ -481,9 +601,20 @@ def clear_word_time():
     update_letters_time()
 
 
+def update_letters_time():
+    for i, btn in enumerate(letter_btns_time):
+        if i in used_indices_time:
+            btn.setEnabled(False)
+            btn.setStyleSheet(f"background-color: #d4d4d4; color: #999; border-radius: {scale_font(27)}px;")
+        else:
+            btn.setEnabled(True)
+            btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(27)}px;")
+
+
 def check_word_time():
-    global score_time, current_word_time, record
+    global score_time, current_word_time, record, found_words_time
     word = current_word_time.upper()
+
     if not word:
         show_msg_time("Собери слово!", "red")
         return
@@ -498,32 +629,23 @@ def check_word_time():
     if Counter(word) <= Counter(main_word_time):
         score_time += len(word)
         found_words_time.append(word)
-        update_score_time()
-        update_found_grid()
+        update_found_words_display()
+        # ОБНОВЛЯЕМ ОТОБРАЖЕНИЕ СЧЁТА
+        if score_label_time:
+            score_label_time.setText(f"⭐ {score_time}")
         clear_word_time()
         show_msg_time(f"+{len(word)} очков!", "green")
         if score_time > record:
             record = score_time
             save_record()
-            record_label_time.setText(f"🏆 {record}")
+            if record_label_time:
+                record_label_time.setText(f"🏆 {record}")
+        if len(found_words_time) >= len(target_words_time):
+            show_msg_time("ВСЕ СЛОВА НАЙДЕНЫ! 🎉", "#6b9e8a")
+            QTimer.singleShot(2000, restart_game)
     else:
         show_msg_time("Нельзя составить!", "red")
         clear_word_time()
-
-
-clear_time.clicked.connect(clear_word_time)
-check_time.clicked.connect(check_word_time)
-
-# Создаём буквы
-letter_btns_time = []
-for i, letter in enumerate(main_word_time):
-    b = QPushButton(letter)
-    b.setFixedSize(60, 60)
-    b.setFont(QFont("Arial", 18, QFont.Bold))
-    b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
-    b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
-    h_letters_time.addWidget(b)
-    letter_btns_time.append(b)
 
 
 def start_timer():
@@ -548,82 +670,74 @@ def time_out():
     global timer, score_time, record
     if timer:
         timer.stop()
-
-    dialog = QDialog(time_win)
-    dialog.setWindowTitle("Время вышло!")
-    dialog.setFixedSize(450, 320)
-    dialog.setModal(True)
-    dialog.setWindowIcon(QIcon("images/word.png"))
-    dialog.setStyleSheet("background-color: #fff5e6;")
-
-    layout = QVBoxLayout(dialog)
-    layout.setSpacing(20)
-    layout.setContentsMargins(30, 30, 30, 30)
-
-    title = QLabel("ВРЕМЯ ВЫШЛО!")
-    title.setFont(QFont("Arial", 22, QFont.Bold))
-    title.setAlignment(Qt.AlignCenter)
-    title.setStyleSheet("color: #ffb7b2;")
-    layout.addWidget(title)
-
-    score_label = QLabel(f"Ваши очки: {score_time}")
-    score_label.setFont(QFont("Arial", 16, QFont.Bold))
-    score_label.setAlignment(Qt.AlignCenter)
-    score_label.setStyleSheet("color: #6b9e8a;")
-    layout.addWidget(score_label)
-
-    record_label = QLabel(f"Рекорд: {record}")
-    record_label.setFont(QFont("Arial", 14))
-    record_label.setAlignment(Qt.AlignCenter)
-    record_label.setStyleSheet("color: #c77d7d;")
-    layout.addWidget(record_label)
-
-    if score_time > record and score_time > 0:
-        new_record_label = QLabel("🎉 НОВЫЙ РЕКОРД! 🎉")
-        new_record_label.setFont(QFont("Arial", 14, QFont.Bold))
-        new_record_label.setAlignment(Qt.AlignCenter)
-        new_record_label.setStyleSheet("color: #ffb7b2;")
-        layout.addWidget(new_record_label)
-
-    layout.addSpacing(20)
-
-    btn_layout = QHBoxLayout()
-    btn_layout.setAlignment(Qt.AlignCenter)
-    btn_layout.setSpacing(20)
-
-    result = [0]
-
-    again_btn = QPushButton("Сыграть снова")
-    again_btn.setFixedSize(200, 45)
-    again_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    again_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
-    again_btn.clicked.connect(lambda: [dialog.done(1), result.__setitem__(0, 1)])
-    btn_layout.addWidget(again_btn)
-
-    menu_btn = QPushButton("В главное меню")
-    menu_btn.setFixedSize(200, 45)
-    menu_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    menu_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
-    menu_btn.clicked.connect(lambda: [dialog.done(2), result.__setitem__(0, 2)])
-    btn_layout.addWidget(menu_btn)
-
-    layout.addLayout(btn_layout)
+        timer = None
+    if time_win is None or not time_win.isVisible():
+        return
 
     for btn in letter_btns_time:
         btn.setEnabled(False)
     clear_time.setEnabled(False)
     check_time.setEnabled(False)
 
-    dialog.exec_()
+    dialog = QDialog(time_win)
+    dialog.setWindowTitle("Время вышло!")
+    dialog.setFixedSize(*scale(450, 320))
+    dialog.setModal(True)
+    dialog.setStyleSheet("background-color: #fff5e6;")
 
-    if result[0] == 1:
-        restart_game()
-    elif result[0] == 2:
-        close_time_mode()
+    layout = QVBoxLayout(dialog)
+    layout.setSpacing(scale_font(20))
+    layout.setContentsMargins(scale(30, 30)[0], scale(30, 30)[1], scale(30, 30)[0], scale(30, 30)[1])
+
+    title = QLabel("ВРЕМЯ ВЫШЛО!")
+    title.setFont(QFont("Arial", scale_font(22), QFont.Bold))
+    title.setAlignment(Qt.AlignCenter)
+    title.setStyleSheet("color: #ffb7b2;")
+    layout.addWidget(title)
+
+    score_lbl = QLabel(f"Ваши очки: {score_time}")
+    score_lbl.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+    score_lbl.setAlignment(Qt.AlignCenter)
+    score_lbl.setStyleSheet("color: #6b9e8a;")
+    layout.addWidget(score_lbl)
+
+    record_lbl = QLabel(f"Рекорд: {record}")
+    record_lbl.setFont(QFont("Arial", scale_font(14)))
+    record_lbl.setAlignment(Qt.AlignCenter)
+    record_lbl.setStyleSheet("color: #c77d7d;")
+    layout.addWidget(record_lbl)
+
+    if score_time > record and score_time > 0:
+        new_rec = QLabel("🎉 НОВЫЙ РЕКОРД! 🎉")
+        new_rec.setFont(QFont("Arial", scale_font(14), QFont.Bold))
+        new_rec.setAlignment(Qt.AlignCenter)
+        new_rec.setStyleSheet("color: #ffb7b2;")
+        layout.addWidget(new_rec)
+
+    btn_layout = QHBoxLayout()
+    btn_layout.setSpacing(scale_font(20))
+
+    again_btn = QPushButton("Сыграть снова")
+    again_btn.setFixedSize(*scale(200, 45))
+    again_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    again_btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(20)}px;")
+    again_btn.clicked.connect(lambda: [dialog.done(1), restart_game()])
+    btn_layout.addWidget(again_btn)
+
+    menu_btn = QPushButton("В главное меню")
+    menu_btn.setFixedSize(*scale(200, 45))
+    menu_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    menu_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
+    menu_btn.clicked.connect(lambda: [dialog.done(2), close_time_mode()])
+    btn_layout.addWidget(menu_btn)
+
+    layout.addLayout(btn_layout)
+    dialog.exec_()
 
 
 def restart_game():
-    global random_key, main_word_time, target_words_time, score_time, found_words_time, current_word_time, used_indices_time, time_left, timer, record, letter_btns_time
+    global random_key, main_word_time, target_words_time, score_time, found_words_time
+    global current_word_time, used_indices_time, time_left, timer, record, letter_btns_time
 
     random_key = random.randint(1, 3)
     main_word_time, target_words_time = time_words[random_key]
@@ -633,10 +747,10 @@ def restart_game():
     used_indices_time = []
     time_left = 60
 
-    update_score_time()
-    update_found_grid()
+    update_found_words_display()
     clear_word_time()
     record_label_time.setText(f"🏆 {record}")
+    timer_label.setText("Время 01:00")
 
     for i in reversed(range(h_letters_time.count())):
         w = h_letters_time.itemAt(i).widget()
@@ -646,14 +760,13 @@ def restart_game():
     letter_btns_time = []
     for i, letter in enumerate(main_word_time):
         b = QPushButton(letter)
-        b.setFixedSize(60, 60)
-        b.setFont(QFont("Arial", 18, QFont.Bold))
-        b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.setFixedSize(*scale(55, 55))
+        b.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+        b.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(27)}px;")
         b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
         h_letters_time.addWidget(b)
         letter_btns_time.append(b)
 
-    timer_label.setText("Время 01:00")
     if timer:
         timer.stop()
     timer = QTimer()
@@ -663,74 +776,127 @@ def restart_game():
     check_time.setEnabled(True)
 
 
-def reset_time_mode():
-    restart_game()
+def open_time_mode():
+    global time_win, timer, score_time, found_words_time, current_word_time, used_indices_time, time_left, record
+    global random_key, main_word_time, target_words_time, letter_btns_time
+
+    if timer:
+        timer.stop()
+        timer = None
+
+    if time_win is None:
+        create_time_window()
+
+    random_key = random.randint(1, 3)
+    main_word_time, target_words_time = time_words[random_key]
+    score_time = 0
+    found_words_time = []
+    current_word_time = ""
+    used_indices_time = []
+    time_left = 60
+
+    update_found_words_display()
+    clear_word_time()
+    record_label_time.setText(f"🏆 {record}")
+    timer_label.setText("Время 01:00")
+
+    for i in reversed(range(h_letters_time.count())):
+        w = h_letters_time.itemAt(i).widget()
+        if w:
+            w.deleteLater()
+
+    letter_btns_time = []
+    for i, letter in enumerate(main_word_time):
+        b = QPushButton(letter)
+        b.setFixedSize(*scale(55, 55))
+        b.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+        b.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(27)}px;")
+        b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
+        h_letters_time.addWidget(b)
+        letter_btns_time.append(b)
+
+    timer = QTimer()
+    timer.timeout.connect(update_timer)
+    timer.start(1000)
+    clear_time.setEnabled(True)
+    check_time.setEnabled(True)
+
+    levels_win.hide()
+    time_win.show()
 
 
-load_record()
-start_timer()
+def close_time_mode():
+    global timer
+    if timer:
+        timer.stop()
+        timer = None
+    if time_win:
+        time_win.hide()
+    levels_win.show()
+    update_total_score_display()
+
 
 # ДАННЫЕ ДЛЯ УРОВНЕЙ
 levels_data = {
-    1: {"word": "БОТИНОК", "target": ["ТОК", "КОТ", "КИТ", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]},
-    2: {"word": "ПРОГРАММА", "target": ["РОГ", "МАГ", "РАМА", "ГОРА", "МАМА", "ПОРА", "ГРАММ", "ГАММА", "МРАМОР"]},
+    1: {"word": "БОТИНОК", "target": ["ТОК", "КОТ", "КИТ", "ТИК", "БОТ", "БОК", "БИНТ", "КИНО", "ОКНО"]},
+    2: {"word": "ПРОГРАММА", "target": ["РОГ", "МАГ", "РОМ", "ПАР", "РАМА", "ГОРА", "МАМА", "ГРОМ", "ПОРА", "ГРАММ", "ГАММА", "МРАМОР"]},
     3: {"word": "РЕГИСТРАЦИЯ",
-        "target": ["ГИТ", "РИС", "АИСТ", "ГИРЯ", "ИГРА", "СТАЯ", "ТИГР", "РАЦИЯ", "АРЕСТ", "ГРАЦИЯ", "СТАРЕЦ",
+        "target": ["ГИТ", "РИС", "ТИР", "АИСТ", "ГИРЯ", "ИГРА", "СЕРА", "СТАЯ", "ТИГР", "РАЦИЯ", "ИСТЕЦ", "АРЕСТ", "ГРАЦИЯ", "СТАРЕЦ",
                    "РЕГИСТР"]}
 }
 
 
-# ФУНКЦИЯ ДЛЯ ДИАЛОГА ПОСЛЕ УРОВНЯ
 def show_level_complete_dialog(level_num, win, score):
     dialog = QDialog(win)
     dialog.setWindowTitle("Уровень пройден!")
-    dialog.setFixedSize(450, 300)
+    dialog.setFixedSize(*scale(450, 300))
     dialog.setModal(True)
     dialog.setWindowIcon(QIcon("images/word.png"))
     dialog.setStyleSheet("background-color: #fff5e6;")
 
     layout = QVBoxLayout(dialog)
-    layout.setSpacing(20)
-    layout.setContentsMargins(30, 30, 30, 30)
+    layout.setSpacing(scale_font(20))
+    layout.setContentsMargins(scale(30, 30)[0], scale(30, 30)[1],
+                              scale(30, 30)[0], scale(30, 30)[1])
 
     title = QLabel("УРОВЕНЬ ПРОЙДЕН!")
-    title.setFont(QFont("Arial", 22, QFont.Bold))
+    title.setFont(QFont("Arial", scale_font(22), QFont.Bold))
     title.setAlignment(Qt.AlignCenter)
     title.setStyleSheet("color: #ffb7b2;")
     layout.addWidget(title)
 
     msg = QLabel(f"Вы прошли уровень {level_num}!")
-    msg.setFont(QFont("Arial", 16, QFont.Bold))
+    msg.setFont(QFont("Arial", scale_font(16), QFont.Bold))
     msg.setAlignment(Qt.AlignCenter)
     msg.setStyleSheet("color: #6b9e8a;")
     layout.addWidget(msg)
 
     score_label = QLabel(f"Набрано очков: {score}")
-    score_label.setFont(QFont("Arial", 14, QFont.Bold))
+    score_label.setFont(QFont("Arial", scale_font(14), QFont.Bold))
     score_label.setAlignment(Qt.AlignCenter)
     score_label.setStyleSheet("color: #c77d7d;")
     layout.addWidget(score_label)
 
-    layout.addSpacing(20)
+    layout.addSpacing(scale_font(20))
 
     btn_layout = QHBoxLayout()
     btn_layout.setAlignment(Qt.AlignCenter)
-    btn_layout.setSpacing(20)
+    btn_layout.setSpacing(scale_font(20))
 
     result = [0]
 
     if level_num < 3:
         next_btn = QPushButton("След. уровень")
-        next_btn.setFixedSize(200, 45)
-        next_btn.setFont(QFont("Arial", 12, QFont.Bold))
-        next_btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 20px;")
+        next_btn.setFixedSize(*scale(200, 45))
+        next_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+        next_btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(20)}px;")
         next_btn.clicked.connect(lambda: [dialog.done(1), result.__setitem__(0, 1)])
         btn_layout.addWidget(next_btn)
 
     menu_btn = QPushButton("В главное меню")
-    menu_btn.setFixedSize(200, 45)
-    menu_btn.setFont(QFont("Arial", 12, QFont.Bold))
-    menu_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
+    menu_btn.setFixedSize(*scale(200, 45))
+    menu_btn.setFont(QFont("Arial", scale_font(12), QFont.Bold))
+    menu_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
     menu_btn.clicked.connect(lambda: [dialog.done(2), result.__setitem__(0, 2)])
     btn_layout.addWidget(menu_btn)
 
@@ -741,7 +907,6 @@ def show_level_complete_dialog(level_num, win, score):
     return result[0]
 
 
-# ОКНО УРОВНЯ (общая функция)
 def create_level_window(level_num):
     win = QMainWindow()
     win.setWindowTitle(f"Слова из слова - Уровень {level_num}")
@@ -752,7 +917,8 @@ def create_level_window(level_num):
     central = QWidget()
     win.setCentralWidget(central)
     v = QVBoxLayout(central)
-    v.setContentsMargins(20, 20, 20, 20)
+    v.setContentsMargins(scale(20, 20)[0], scale(20, 20)[1],
+                         scale(20, 20)[0], scale(20, 20)[1])
 
     progress_data = load_levels_progress()
     score = progress_data.get("scores", {}).get(str(level_num), 0)
@@ -760,40 +926,71 @@ def create_level_window(level_num):
 
     top = QHBoxLayout()
     back = QPushButton("назад")
-    back.setFixedSize(100, 40)
-    back.setFont(QFont("Arial", 16, QFont.Bold))
-    back.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 20px;")
+    back.setFixedSize(*scale(100, 40))
+    back.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+    back.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(20)}px;")
     top.addWidget(back)
     top.addStretch()
     level_title = QLabel(f"УРОВЕНЬ {level_num}")
-    level_title.setFont(QFont("Arial", 24, QFont.Bold))
+    level_title.setFont(QFont("Arial", scale_font(24), QFont.Bold))
     level_title.setAlignment(Qt.AlignCenter)
     level_title.setStyleSheet("color: #ffb7b2;")
     top.addWidget(level_title)
     top.addStretch()
     score_lbl = QLabel("⭐ 0")
-    score_lbl.setFont(QFont("Arial", 18, QFont.Bold))
+    score_lbl.setFont(QFont("Arial", scale_font(18), QFont.Bold))
     score_lbl.setStyleSheet("color: #ffb7b2;")
     top.addWidget(score_lbl)
     v.addLayout(top)
 
     msg_lbl = QLabel("")
-    msg_lbl.setFont(QFont("Arial", 28, QFont.Bold))
+    msg_lbl.setFont(QFont("Arial", scale_font(28), QFont.Bold))
     msg_lbl.setAlignment(Qt.AlignCenter)
+    msg_lbl.setMinimumHeight(scale_font(50))
     v.addWidget(msg_lbl)
 
     words = levels_data[level_num]["target"]
     word_labels = []
+
+    words_container = QWidget()
+    words_layout = QVBoxLayout(words_container)
+    words_layout.setAlignment(Qt.AlignCenter)
+    words_layout.setSpacing(scale_font(10))
+
     for w in words:
         lbl = QLabel(" ".join(["-"] * len(w)))
-        lbl.setFont(QFont("Courier", 20, QFont.Bold))
+        lbl.setFont(QFont("Courier", scale_font(20), QFont.Bold))
         lbl.setAlignment(Qt.AlignCenter)
         lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 8px; border-radius: 10px;")
-        lbl.setFixedWidth(len(w) * 50)
-        v.addWidget(lbl, alignment=Qt.AlignCenter)
+        lbl.setMinimumWidth(scale_font(len(w) * 40))
+        lbl.setMaximumWidth(scale_font(len(w) * 50))
+        words_layout.addWidget(lbl, alignment=Qt.AlignCenter)
         word_labels.append(lbl)
 
-    v.addStretch()
+    words_scroll = QScrollArea()
+    words_scroll.setWidgetResizable(True)
+    words_scroll.setStyleSheet("""
+        QScrollArea {
+            background: transparent;
+            border: none;
+        }
+        QScrollBar:vertical {
+            background: #fff5e6;
+            width: 8px;
+            border-radius: 4px;
+        }
+        QScrollBar::handle:vertical {
+            background: #c77d7d;
+            border-radius: 4px;
+            min-height: 30px;
+        }
+    """)
+    words_scroll.setWidget(words_container)
+    words_scroll.setMinimumHeight(scale_font(200))
+    words_scroll.setMaximumHeight(scale_font(300))
+    v.addWidget(words_scroll)
+
+    v.addSpacing(scale_font(10))
 
     current_word = ""
     used_indices = []
@@ -801,51 +998,64 @@ def create_level_window(level_num):
     found_words = found.copy()
 
     current_lbl = QLabel("")
-    current_lbl.setFont(QFont("Courier", 32, QFont.Bold))
+    current_lbl.setFont(QFont("Courier", scale_font(32), QFont.Bold))
     current_lbl.setAlignment(Qt.AlignCenter)
     current_lbl.setStyleSheet("background-color: #ffe4e9; color: #c77d7d; padding: 15px; border-radius: 15px;")
-    current_lbl.setMinimumHeight(80)
+    current_lbl.setMinimumHeight(scale_font(70))
     v.addWidget(current_lbl)
 
     h_btn = QHBoxLayout()
     h_btn.setAlignment(Qt.AlignCenter)
-    h_btn.setSpacing(30)
+    h_btn.setSpacing(scale_font(30))
     clear_btn = QPushButton("✖")
-    clear_btn.setFixedSize(70, 70)
-    clear_btn.setFont(QFont("Arial", 28))
-    clear_btn.setStyleSheet("background-color: #ffb7b2; color: white; border-radius: 35px;")
+    clear_btn.setFixedSize(*scale(65, 65))
+    clear_btn.setFont(QFont("Arial", scale_font(28)))
+    clear_btn.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(32)}px;")
     check_btn = QPushButton("✓")
-    check_btn.setFixedSize(70, 70)
-    check_btn.setFont(QFont("Arial", 28))
-    check_btn.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 35px;")
+    check_btn.setFixedSize(*scale(65, 65))
+    check_btn.setFont(QFont("Arial", scale_font(28)))
+    check_btn.setStyleSheet(f"background-color: #a8e6cf; color: white; border-radius: {scale_font(32)}px;")
     h_btn.addWidget(clear_btn)
     h_btn.addWidget(check_btn)
     v.addLayout(h_btn)
 
     hint = QLabel("Составь слово из букв:")
-    hint.setFont(QFont("Arial", 12))
+    hint.setFont(QFont("Arial", scale_font(12)))
     hint.setStyleSheet("color: #d4a5a5;")
     v.addWidget(hint)
 
-    h_letters = QHBoxLayout()
+    # Буквы с прокруткой
+    letters_scroll = QScrollArea()
+    letters_scroll.setWidgetResizable(True)
+    letters_scroll.setStyleSheet("background: transparent; border: none;")
+    letters_scroll.setMaximumHeight(scale_font(80))
+    letters_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+    letters_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    letters_widget = QWidget()
+    h_letters = QHBoxLayout(letters_widget)
     h_letters.setAlignment(Qt.AlignCenter)
-    h_letters.setSpacing(10)
+    h_letters.setSpacing(scale_font(8))
+    h_letters.setContentsMargins(scale(5, 5)[0], scale(5, 5)[1],
+                                 scale(5, 5)[0], scale(5, 5)[1])
+
+    letters_scroll.setWidget(letters_widget)
+    v.addWidget(letters_scroll)
 
     letter_btns = []
     main_word = levels_data[level_num]["word"]
     for i, letter in enumerate(main_word):
         b = QPushButton(letter)
-        b.setFixedSize(60, 60)
-        b.setFont(QFont("Arial", 18, QFont.Bold))
-        b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+        b.setFixedSize(*scale(50, 50))
+        b.setFont(QFont("Arial", scale_font(16), QFont.Bold))
+        b.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(25)}px;")
         b.clicked.connect(lambda checked, idx=i: add_letter(idx))
         h_letters.addWidget(b)
         letter_btns.append(b)
-    v.addLayout(h_letters)
 
     def show_msg(txt, col):
         msg_lbl.setText(txt)
-        msg_lbl.setStyleSheet(f"color: {col}; font-size: 28px; font-weight: bold;")
+        msg_lbl.setStyleSheet(f"color: {col}; font-size: {scale_font(28)}px; font-weight: bold;")
         QTimer.singleShot(1500, lambda: msg_lbl.setText(""))
 
     def update_score():
@@ -866,10 +1076,10 @@ def create_level_window(level_num):
         for i, btn in enumerate(letter_btns):
             if i in used_indices:
                 btn.setEnabled(False)
-                btn.setStyleSheet("background-color: #d4d4d4; color: #999999; border-radius: 30px;")
+                btn.setStyleSheet(f"background-color: #d4d4d4; color: #999999; border-radius: {scale_font(25)}px;")
             else:
                 btn.setEnabled(True)
-                btn.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
+                btn.setStyleSheet(f"background-color: #a8e6cf; color: #6b9e8a; border-radius: {scale_font(25)}px;")
 
     def add_letter(idx):
         nonlocal current_word
@@ -962,21 +1172,24 @@ def create_level_window(level_num):
     return win
 
 
-# ========== СОЗДАЁМ ОКНА УРОВНЕЙ ==========
-level1_win = create_level_window(1)
-level2_win = create_level_window(2)
-level3_win = create_level_window(3)
+# ========== ПЕРЕХОДЫ ==========
+level1_win = None
+level2_win = None
+level3_win = None
 
 
-# ПЕРЕХОДЫ
 def to_levels():
+    global levels_win
+    if levels_win is None:
+        create_levels_window()
     main_win.hide()
     levels_win.show()
     update_total_score_display()
 
 
 def back_to_main():
-    levels_win.hide()
+    if levels_win:
+        levels_win.hide()
     main_win.show()
 
 
@@ -1001,81 +1214,9 @@ def to_level3():
     level3_win.show()
 
 
-def back_from_level1():
-    level1_win.hide()
-    levels_win.show()
-
-
-def back_from_level2():
-    level2_win.hide()
-    levels_win.show()
-
-
-def back_from_level3():
-    level3_win.hide()
-    levels_win.show()
-
-
-def open_time_mode():
-    global score_time, found_words_time, current_word_time, used_indices_time, time_left, random_key, main_word_time, target_words_time, timer
-
-    random_key = random.randint(1, 3)
-    main_word_time, target_words_time = time_words[random_key]
-    score_time = 0
-    found_words_time = []
-    current_word_time = ""
-    used_indices_time = []
-    time_left = 60
-
-    update_score_time()
-    update_found_grid()
-    clear_word_time()
-    record_label_time.setText(f"🏆 {record}")
-
-    for i in reversed(range(h_letters_time.count())):
-        w = h_letters_time.itemAt(i).widget()
-        if w:
-            w.deleteLater()
-
-    letter_btns_time.clear()
-    for i, letter in enumerate(main_word_time):
-        b = QPushButton(letter)
-        b.setFixedSize(60, 60)
-        b.setFont(QFont("Arial", 18, QFont.Bold))
-        b.setStyleSheet("background-color: #a8e6cf; color: #6b9e8a; border-radius: 30px;")
-        b.clicked.connect(lambda checked, idx=i: add_letter_time(idx))
-        h_letters_time.addWidget(b)
-        letter_btns_time.append(b)
-
-    timer_label.setText("Время 01:00")
-    if timer:
-        timer.stop()
-    timer = QTimer()
-    timer.timeout.connect(update_timer)
-    timer.start(1000)
-
-    clear_time.setEnabled(True)
-    check_time.setEnabled(True)
-
-    levels_win.hide()
-    time_win.show()
-
-
-def close_time_mode():
-    time_win.hide()
-    levels_win.show()
-    update_total_score_display()
-
-
-# Подключаем кнопки
+load_record()
 play_btn.clicked.connect(to_levels)
 exit_btn.clicked.connect(main_win.close)
-back_btn.clicked.connect(back_to_main)
-btn1.clicked.connect(to_level1)
-btn2.clicked.connect(to_level2)
-btn3.clicked.connect(to_level3)
-time_btn.clicked.connect(open_time_mode)
-back_time.clicked.connect(close_time_mode)
 
 main_win.show()
 sys.exit(app.exec_())
