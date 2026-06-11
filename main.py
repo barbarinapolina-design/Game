@@ -511,25 +511,13 @@ def create_time_window():
     clear_time = QPushButton("✖")
     clear_time.setFixedSize(*scale(65, 65))
     clear_time.setFont(QFont("Arial", scale_font(30)))
-    clear_time.setStyleSheet(f"""
-        QPushButton {{
-            background-color: #ffb7b2;
-            color: white;
-            border-radius: {scale_font(32)}px;
-        }}
-    """)
+    clear_time.setStyleSheet(f"background-color: #ffb7b2; color: white; border-radius: {scale_font(32)}px;")
     h_actions.addWidget(clear_time)
 
     check_time = QPushButton("✓")
     check_time.setFixedSize(*scale(65, 65))
     check_time.setFont(QFont("Arial", scale_font(30)))
-    check_time.setStyleSheet(f"""
-        QPushButton {{
-            background-color: #a8e6cf;
-            color: white;
-            border-radius: {scale_font(32)}px;
-        }}
-    """)
+    check_time.setStyleSheet(f"background-color: #a8e6cf; color: white; border-radius: {scale_font(32)}px")
     h_actions.addWidget(check_time)
 
     v_time.addLayout(h_actions)
@@ -577,12 +565,7 @@ def update_found_words_display():
         lbl = QLabel(word)
         lbl.setFont(QFont("Courier", scale_font(14), QFont.Bold))
         lbl.setAlignment(Qt.AlignCenter)
-        lbl.setStyleSheet(f"""
-            background-color: #a8e6cf;
-            color: #6b9e8a;
-            padding: {scale_font(5)}px {scale_font(10)}px;
-            border-radius: {scale_font(10)}px;
-        """)
+        lbl.setStyleSheet(f"background-color: #a8e6cf;color: #6b9e8a;padding: {scale_font(5)}px {scale_font(10)}px;border-radius: {scale_font(10)}px;")
         found_layout_time.addWidget(lbl, i // cols, i % cols)
 
 
@@ -639,7 +622,6 @@ def check_word_time():
         score_time += len(word)
         found_words_time.append(word)
         update_found_words_display()
-        # ОБНОВЛЯЕМ ОТОБРАЖЕНИЕ СЧЁТА
         if score_label_time:
             score_label_time.setText(f"⭐ {score_time}")
         clear_word_time()
@@ -1180,10 +1162,50 @@ def create_level_window(level_num):
     update_score()
     update_words()
 
+    if level_num == 1 and not found_words:
+        rules_dialog = QDialog(win)
+        rules_dialog.setWindowTitle(" ")
+        rules_dialog.setFixedSize(700, 750)
+        rules_dialog.setModal(True)
+        rules_dialog.setStyleSheet("background-color: #fff5e6;")
+
+        layout = QVBoxLayout(rules_dialog)
+        layout.setSpacing(20)
+        layout.setContentsMargins(40, 30, 40, 30)
+
+        title = QLabel("ПРАВИЛА ИГРЫ")
+        title.setFont(QFont("Arial", 28, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #ffb7b2;")
+        layout.addWidget(title)
+
+        rules_text = QLabel(
+            "1. Вам дано исходное слово.\n\n"
+            "2. Из букв этого слова нужно составлять\n"
+            "   другие слова, которые являются именами\n"
+            "   сущ., нарицательными, в ед.ч. и Им.п.\n\n"
+            "3. Нажимайте на буквы, чтобы собрать слово.\n\n"
+            "4. Нажмите ✓ для проверки слова.\n\n"
+            "5. За каждое отгаданное слово вы получаете\n"
+            "   количество очков, равное числу букв."
+        )
+        rules_text.setFont(QFont("Arial", 16))
+        rules_text.setWordWrap(True)
+        rules_text.setStyleSheet("color: #6b9e8a;")
+        layout.addWidget(rules_text)
+
+        ok_btn = QPushButton("ОК")
+        ok_btn.setFixedSize(140, 60)
+        ok_btn.setFont(QFont("Arial", 22, QFont.Bold))
+        ok_btn.setStyleSheet("background-color: #a8e6cf; color: white; border-radius: 30px")
+        ok_btn.clicked.connect(rules_dialog.accept)
+        layout.addWidget(ok_btn, alignment=Qt.AlignCenter)
+
+        rules_dialog.exec_()
     return win
 
 
-# ========== ПЕРЕХОДЫ ==========
+# ПЕРЕХОДЫ
 level1_win = None
 level2_win = None
 level3_win = None
