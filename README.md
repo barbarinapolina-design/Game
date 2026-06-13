@@ -1,8 +1,6 @@
-<img src="images/word.png" width="40" height="40" align="left" style="margin-right: 15px;">
+# <img src="images/word.png" width="50" height="50" align="left" style="margin-right: 15px;"> СЛОВА ИЗ СЛОВА
 
-# СЛОВА ИЗ СЛОВА
-
-Игра для составления слов из заданных букв. Учебный проект на PyQt5.
+### Игра для составления слов из заданных букв. Учебный проект на PyQt5.
 
 <br clear="both">
 
