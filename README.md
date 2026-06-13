@@ -1,7 +1,10 @@
-<img src="images/word.png" width="48" height="48" align="left" style="margin-right: 10px;"> # Слова из слова
+<img src="images/word.png" width="40" height="40" align="left" style="margin-right: 15px;">
 
-Игра для составления слов из букв исходного. 
-Учебный проект на PyQt5.
+# СЛОВА ИЗ СЛОВА
+
+Игра для составления слов из заданных букв. Учебный проект на PyQt5.
+
+<br clear="both">
 
 ## Скриншоты
 
@@ -11,7 +14,8 @@
 ![Игровой процесс](screenshots/gameplay.png)
 ![Режим "На время"](screenshots/timemode.png)
 
-## ✨ Особенности
+## <img src="images/word.png" width="25" height="25" align="left" style="margin-right: 15px;">  Особенности
+
 
 -  3 уровня сложности с разными словами
 -  Режим "На время" с рекордами
@@ -19,7 +23,7 @@
 -  Адаптивный интерфейс под любой экран
 -  Управление мышью, закрытие по ESC
 
-## 🎲 Правила игры
+## <img src="images/word.png" width="25" height="25" align="left" style="margin-right: 15px;">  Правила игры
 
 1. Вам дано исходное слово
 2. Из букв этого слова нужно составлять другие слова
@@ -28,7 +32,7 @@
 5. Нажмите ✓ для проверки слова
 6. За каждое отгаданное слово вы получаете количество очков, равное числу букв
 
-## 🚀 Установка и запуск
+## <img src="images/word.png" width="25" height="25" align="left" style="margin-right: 15px;">  Установка и запуск
 
 ### Требования
 - Python 3.7 или выше
